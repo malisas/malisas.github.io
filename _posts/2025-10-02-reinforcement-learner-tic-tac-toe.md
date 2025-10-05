@@ -35,16 +35,77 @@ By definition, a reinforcement learner does not know the goal of tic-tac-toe. Th
 
 This leads to the following software considerations:
 1. The reinforcement learner will need to play a lot of games in order to train.
-2. The reinforcement learner needs some way to store its learnings (e.g. updated probabilities) across games. The technical terminology for this is a `policy`, which we will define here as a dictionary that maps each board state to a set of moves and their evolving probabilities.
+2. The reinforcement learner needs some way to store its learnings (e.g. updated probabilities) across games. The technical terminology for this is a `policy`, which we will define here as a dictionary that maps each board state to a set of moves and their evolving probabilities/weights.
+
+**RL Terminology:** A policy is the strategy an agent uses to decide actions. States are mapped to possible actions and their probabilities.
+{: .notice--info}
+
 3. The reinforcement learner needs an opponent to play against.
 
 Taking these requirements at face value, it's quite simple to write a program that fulfills the basic definition of a reinforcement learner.
 
 # Code
 
+## Representing the board
+
+There needs to be a way to represent the tic-tac-toe board using code. One approach is to consider the board as a grid with spots numbered 1 through 9:  
+![tictactoe3](/assets/images/tictactoe3.svg){:height="15%" width="15%"}  
+
+Suppose we want to represent the following board:  
+![tictactoe2](/assets/images/tictactoe2.svg){:height="15%" width="15%"} 
+
+**Representation 1 (move order does matter):**  
+- We can use the following list representation of the board:  
+`[[7,6],[5,9]]`  
+Here it is taken to mean that player 1 played <span style="color:blue;">`7`</span> on their first move, followed by <span style="color:blue;">`6`</span> on their next turn.
+
+**Representation 2 (when move order does not matter):**  
+- Move order does not matter: Suppose in game 1, player 1 played <span style="color:blue;">`6`</span> followed by <span style="color:blue;">`7`</span>, but in game 2 they played <span style="color:blue;">`7`</span> followed by <span style="color:blue;">`6`</span>. Note that the historical order of the moves does not affect what the "best" move will be on the player's next move. Therefore, we will apply the convention that `'6759'` could refer to either game.
+- We use the convention that because <span style="color:blue;">`67`</span> comes before <span style="color:red;">`59`</span> in the string, we know that player 1 played moves <span style="color:blue;">`6`</span>  and <span style="color:blue;">`7`</span> , whereas player 2 played moves <span style="color:red;">`5`</span> and <span style="color:red;">`9`</span>. 
+  - Because both players have played an equal number of moves, we know it's player 1's move next.  
+
 ## The reinforcement learner
 
 <!-- <details markdown="1"><summary>Click to expand code</summary> -->
+
+The `ReinforcementLearner` class has two main functions: `move` and `update_policy`.  
+- The `move` function accepts the current `board_state` and looks up its entry in `self.policy`. It will then choose randomly from the moves available for the current board state, weighted by the values in `self.policy`.
+  - An example of a possible `policy` entry for the following board is 
+  ```
+  {'6759': {1: 0.525,
+            2: 0.475,
+            3: 0.15,
+            4: 0.45,
+            8: 0.425}}
+  ```
+  ![tictactoe2](/assets/images/tictactoe2.svg){:height="15%" width="15%"}
+- The `update_policy` function is run after each game of tic-tac-toe. If the reinforcement learner won, it will be "rewarded" by positively incrementing the weight of the moves it made during that game, in `self.policy`.   
+For the following board where <span style="color:blue;">R</span> won (represented by `[[6,7,1,4],[5,9,2]]`), the winning move <span style="color:blue;">`4`</span> is awarded a full 0.1 points, the second-to-last move is awarded 0.05 points, all the way down to 0.0125 points for the first move (<span style="color:blue;">`6`</span>).  
+![tictactoe4](/assets/images/tictactoe4.svg){:height="15%" width="15%"}
+- By the way, it's possible for the policy entry to contain negative values:
+```
+{'6759': {1: 4.17,
+          2: -5.37,
+          3: -8.64,
+          4: -3.95,
+          8: -5.52}}
+```
+This doesn't translate directly to appropriate probabilities for choosing each move. The way to convert these values to actual probabilities is accomplished by the `softmax` function:
+
+| Move | Policy Value | Softmax |
+|---|---|---|
+| 1 | 4.17 | 0.999 |
+| 2 | -5.37 | 7.11e-05 |
+| 3 | -8.64 | 2.69e-06 |
+| 4 | -3.95 | 0.0002 |
+| 8 | -5.52 | 6.12e-05 |
+
+This is another term that is encountered a lot in RL.
+
+**RL Terminology:** The [softmax function](https://en.wikipedia.org/wiki/Softmax_function#Reinforcement_learning) can be used to convert values into action probabilities.
+{: .notice--info}
+
+Putting it all together, the `ReinforcementLearner` class looks like the following: 
 
 {% highlight python linenos %}
 class ReinforcementLearner(Player):
@@ -83,7 +144,10 @@ class ReinforcementLearner(Player):
             possible_moves = set(get_available_moves(current_board_state))
             self.policy[policy_key] = dict.fromkeys(possible_moves, 0.5)
 
-# Turn board_state into a simpler "standardized" value, an integer that can be used as a dictionary key
+class Player:
+    def __init__(self, name=None):
+        self.name = name
+
 def get_board_state_std(board_state):
     # [[3,5,2],[9,4]] would become '23549'
     # Each player's turns are sorted and then concatenated
@@ -95,9 +159,6 @@ def softmax(weights):
     weights_softmax = [x / divisor for x in weight  s_softmax]
     return weights_softmax
 
-class Player:
-    def __init__(self, name=None):
-        self.name = name
 {% endhighlight %}
 
 <!-- </details> -->
