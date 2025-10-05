@@ -80,11 +80,13 @@ defaults:
       type: posts
     values:
       layout: single
-      author_profile: true
+      author_profile: false
       read_time: false
       comments: true
       share: false
       related: false
+      toc: true
+      toc_label: "Jump to..."
   # _pages
   - scope:
       path: "_pages"
@@ -99,6 +101,3 @@ category_archive:
 tag_archive:
   type: liquid
   path: /tags/
-
-svg:
-  optimize: true
