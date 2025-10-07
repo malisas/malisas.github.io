@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2025-10-05T13:24:45.353327</dc:date>
+    <dc:date>2025-10-06T20:43:46.076107</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -32,63 +32,50 @@ z
    <g id="line2d_1">
     <path d="M 0 184.8 
 L 277.2 184.8 
-" clip-path="url(#pb8e10c24a1)" style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"/>
+" clip-path="url(#p77a4aeadee)" style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"/>
    </g>
    <g id="line2d_2">
     <path d="M 92.4 277.2 
 L 92.4 0 
-" clip-path="url(#pb8e10c24a1)" style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"/>
+" clip-path="url(#p77a4aeadee)" style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"/>
    </g>
    <g id="line2d_3">
     <path d="M 0 92.4 
 L 277.2 92.4 
-" clip-path="url(#pb8e10c24a1)" style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"/>
+" clip-path="url(#p77a4aeadee)" style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"/>
    </g>
    <g id="line2d_4">
     <path d="M 184.8 277.2 
 L 184.8 0 
-" clip-path="url(#pb8e10c24a1)" style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"/>
+" clip-path="url(#p77a4aeadee)" style="fill: none; stroke: #000000; stroke-width: 2; stroke-linecap: square"/>
    </g>
    <g id="text_1">
-    <!-- R -->
-    <g style="fill: #0000ff" transform="translate(217.103125 149.6375) scale(0.4 -0.4)">
+    <!-- X -->
+    <g style="fill: #0000ff" transform="translate(217.3 149.6375) scale(0.4 -0.4)">
      <defs>
-      <path id="DejaVuSans-52" d="M 2841 2188 
-Q 3044 2119 3236 1894 
-Q 3428 1669 3622 1275 
-L 4263 0 
-L 3584 0 
-L 2988 1197 
-Q 2756 1666 2539 1819 
-Q 2322 1972 1947 1972 
-L 1259 1972 
-L 1259 0 
-L 628 0 
-L 628 4666 
-L 2053 4666 
-Q 2853 4666 3247 4331 
-Q 3641 3997 3641 3322 
-Q 3641 2881 3436 2590 
-Q 3231 2300 2841 2188 
-z
-M 1259 4147 
-L 1259 2491 
-L 2053 2491 
-Q 2509 2491 2742 2702 
-Q 2975 2913 2975 3322 
-Q 2975 3731 2742 3939 
-Q 2509 4147 2053 4147 
-L 1259 4147 
+      <path id="DejaVuSans-58" d="M 403 4666 
+L 1081 4666 
+L 2241 2931 
+L 3406 4666 
+L 4084 4666 
+L 2584 2425 
+L 4184 0 
+L 3506 0 
+L 2194 1984 
+L 872 0 
+L 191 0 
+L 1856 2491 
+L 403 4666 
 z
 " transform="scale(0.015625)"/>
      </defs>
-     <use xlink:href="#DejaVuSans-52"/>
+     <use xlink:href="#DejaVuSans-58"/>
     </g>
    </g>
    <g id="text_2">
-    <!-- R -->
-    <g style="fill: #0000ff" transform="translate(32.303125 242.0375) scale(0.4 -0.4)">
-     <use xlink:href="#DejaVuSans-52"/>
+    <!-- X -->
+    <g style="fill: #0000ff" transform="translate(32.5 242.0375) scale(0.4 -0.4)">
+     <use xlink:href="#DejaVuSans-58"/>
     </g>
    </g>
    <g id="text_3">
@@ -129,7 +116,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="pb8e10c24a1">
+  <clipPath id="p77a4aeadee">
    <rect x="0" y="0" width="277.2" height="277.2"/>
   </clipPath>
  </defs>
