@@ -31,7 +31,7 @@ Suppose it randomly chooses the following space as its next move:
 <span style="color:red;">**O**</span> then wins on the next move:  
 ![tictactoe7](/assets/images/tictactoe7.gif){:height="15%" width="15%"} 
 
-This will trigger a "game over" state. When this happens, the reinforcement learner will update its future behavior to account for the fact that it lost to <span style="color:red;">**O**</span>. This is how it "learns". After this game (or "episode"), if it encounters the same situation in the future, it will be less likely to choose the same space. In RL terminology, the agent receives a negative reward for its behavior.
+This will trigger a "game over" state. When this happens, the reinforcement learner will update its future behavior to account for the fact that it lost to <span style="color:red;">**O**</span>. This is how it "learns". After this game (or "episode"), it will be less likely to make the same move in the future. In RL terminology, the agent receives a negative reward for its behavior.
 
 **RL Terminology:** Episodic tasks in reinforcement learning consist of a sequence of steps that end in a terminal state, after which the agent is rewarded for its performance. 
 {: .notice--info}
@@ -42,7 +42,7 @@ To recap, a reinforcement learner does not know the goal of tic-tac-toe. The onl
 
 This leads to the following software considerations:
 1. The reinforcement learner needs to train by playing a lot of games.
-2. The reinforcement learner needs some way to store its learnings (e.g. updated probabilities) across games. The technical terminology for this is a `policy`, which we will define here as a dictionary that maps each board state to a set of moves and their evolving probabilities/weights.
+2. The reinforcement learner needs some way to store its learnings (e.g. updated probabilities) across games. The technical terminology for this is a `policy`, which we will define here as a dictionary that maps each board state to a set of possible moves and their evolving probabilities/weights.
 3. The reinforcement learner also needs an opponent.
 
 **RL Terminology:** A policy is the strategy an agent uses to decide actions. A policy maps states to possible actions and their probabilities.
@@ -52,7 +52,7 @@ Taking these requirements at face value, we can write a program that fulfills th
 
 # Coding the Reinforcement Learner
 
-This section talks about the technical details of coding the reinforcement learner. You can jump to ___ if you want to go straight to the results.
+This section talks about the technical details of coding the reinforcement learner. You can jump to [Exploring the Results](#exploring-the-results) if you want to go straight to the results.
 
 ## Representing the board
 
@@ -85,7 +85,7 @@ By "ignoring move order", it means that the following two games:
 [[6,7],[5,9]]
 ```
 are represented by the single string above.  
-We will use this representation as the key to our policy dictionary (discussed later). The list has been converted to a string because a list cannot be a dictionary key. We purposely ignore the move order in the policy dictionary because the historical order of the moves does not affect what the "best" move will be on the player's next move.  
+We will use this representation as the key to our policy dictionary (discussed later). We purposely ignore the move order in the policy dictionary because the historical order of the moves does not affect what the "best" move will be on the player's next move. The list has been converted to a string because a list cannot be a dictionary key.  
 
 Now if you see `board` and `board_str` in the code, you'll know what they are referring to.  
 
@@ -121,7 +121,7 @@ Note that not all moves are rewarded equally. For the following board where <spa
 This doesn't translate directly to appropriate probabilities for choosing each move. So we will convert these values to actual probabilities using the `softmax` function, which is commonly used in RL. Here you can see how the policy values turn into appropriate probabilities after applying the softmax function:
 
 | Move | Policy Value | Softmax |
-|---|---|---|
+|---:|---:|---:|
 | 1 | 4.17 | 0.999 |
 | 2 | -5.37 | 7.11e-05 |
 | 3 | -8.64 | 2.69e-06 |
@@ -196,17 +196,99 @@ def softmax(weights):
 
 ## The Opponent
 
-We will provide two opponents for the reinforcement learner: `DumbPlayer` and `SmartPlayer`.  
+We will provide two opponents for the reinforcement learner: `DumbPlayer` and `OptimalPlayer`.  
 1. `DumbPlayer` will always choose a random move.
-2. `SmartPlayer` will always choose the best move. Tic-tac-toe is a simple game, so it's possible to write a program that always picks the best move. Games like Go are much more complex and require more sophisticated approaches...like reinforcement learning!
+2. `OptimalPlayer` will always choose an optimal move (a move that ensures not losing).
 
 Link to the code for these players: [link]()
 
 ## Gameplay
 
-Finally, we have a couple functions that take care of game play: `play_game()` and `train_rl()` which trains a reinforcement learner against an opponent for a specified number of games. We also have a `tournament()` function which we will use to test how well our reinforcement learner(s) perform after they have been trained!
+Finally, we have a couple functions that take care of game play: `play_game()` plays a single game, and `train_rl()` trains a reinforcement learner against an opponent for a specified number of games.
+
+We also have a `tournament()` function which we will use to test how well our reinforcement learner performs after being trained.
 
 Link to this code: [link]()
 
 # Exploring the Results
 
+## Performance improves over time
+
+Let's have the reinforcement learner play 100,000 games against `OptimalPlayer`. Every 1,000 games, we'll calculate what proportion of the last 1,000 games the reinforcement learner won, and plot the performance over time.  
+![tictactoe10](/assets/images/tictactoe10.svg)  
+After 100,000 games, the score is around 0.4: most games end in a tie.  
+This is not terrible, considering that if two perfect players play against each other, every game will end in a tie:  
+![tictactoe12](/assets/images/tictactoe11.svg)  
+
+## Improve performance by training even longer
+
+Can we understand why is the reinforcement learner still making mistakes after almost 100,000 games? Let's look at one of the games it lost (game number 99,009):  
+(Here the player symbols are <span style="color:blue;">**R**</span> for "Reinforcement Learner" and <span style="color:red;">**O**</span> for "Opponent")  
+<!-- ![tictactoe12](/assets/images/tictactoe12.svg){:height="15%" width="15%"}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Replay:
+![tictactoe13](/assets/images/tictactoe13.gif){:height="20%" width="20%"}   -->
+![tictactoe14](/assets/images/tictactoe14.svg){:height="50%" width="50%"}  
+<span style="color:blue;">**R**</span> plays two moves. Focusing on move 2 where <span style="color:blue;">**R**</span> plays space <span style="color:blue;">1</span>, note that the best move for <span style="color:blue;">**R**</span> is `5`. But if we look at the policy entry for the board right before the move, we see there is a 7.6% chance that the reinforcement learner will choose <span style="color:blue;">1</span>:
+
+|   Move |   Policy Value |   Softmax |
+|-------:|---------------:|----------:|
+|      1 |        -17.675 |     0.076 |
+|      2 |        -17.725 |     0.072 |
+|      3 |        -16.825 |     0.178 |
+|      4 |        -17.85  |     0.064 |
+|      5 |        -16.163 |     0.345 |
+|      6 |        -18.075 |     0.051 |
+|      7 |        -17.063 |     0.14  |
+|      8 |        -17.725 |     0.072 |
+
+Let's see if we can get that percent down to 0 by training even longer! Say, 1,500,000 games.  
+After 1,500,000 games of tic-tac-toe, there is only a 0.2% chance that the reinforcement learner will choose <span style="color:blue;">1</span>, and the average score is about 0.5:
+
+|   Move |   Policy Value |   Softmax |
+|-------:|---------------:|----------:|
+|      1 |        -44.875 |     0.002 |
+|      2 |        -44.775 |     0.002 |
+|      3 |        -40.4   |     0.169 |
+|      4 |        -44.8   |     0.002 |
+|      5 |        -39.112 |     0.612 |
+|      6 |        -44.75  |     0.002 |
+|      7 |        -40.187 |     0.209 |
+|      8 |        -44.95  |     0.002 |
+
+![tictactoe15](/assets/images/tictactoe15.svg)  
+
+That's pretty good! 
+
+## The reinforcement learner is only as good as its experience
+
+After 1,500,000 training rounds against the optimal player, the reinforcement learner is consistently getting ties, so it's looking pretty good.  
+But suppose a mischevious opponent (😈) now decides to challenge the reinforcement learner to a game!  
+Here's how the game proceeds:  
+![tictactoe16](/assets/images/tictactoe16.svg){:height="50%" width="50%"}  
+The reinforcement learner played some obviously bad moves and lost! How did this happen?  
+If we look at the policy entry for moves 3 and 5, we see...they don't exist!
+```python
+# Move 3
+'14' in snapshots_rl_v_smart[1500000].policy.keys()
+# False
+
+# Move 5
+'1846' in snapshots_rl_v_smart[1500000].policy.keys()
+# False
+```
+This means the reinforcement learner has never encountered these board states before. The mischevious opponent intentionally played moves that the reinforcement learner had never encountered, and the reinforcement learner therefore picked spaces at random.  
+
+How did this happen? Here are a couple reasons:  
+1. During training, the reinforcement learner played games against the **Optimal** Player. This optimal player always plays optimal moves which pursue the most win conditions while blocking the opponent's win. This strategy is predictable. Knowing this, the mischevious player played a move that it knew the optimal player would not play.
+2. The **reinforcement learner** can also get stuck playing the same moves over and over again by its own design.  
+If the reinforcement learner plays <span style="color:blue;">5</span> on its first turn and it leads to a win, it will be more likely to play <span style="color:blue;">5</span> in the second game, which, if it again leads to a win, will further reinforce the probability of playing space <span style="color:blue;">5</span>...in fact it might never get practice playing space <span style="color:blue;">1</span>.
+
+So how can we train better so that the reinforcement learner is better prepared for every situation?
+
+## Exploration vs Exploitation
+
+The reinforcement learner currently plays "exploitatively", meaning that it will always be more likely to choose a move that historically led to a higher score. We can instead force it to play more "exploratively" by increasing the probability of choosing other moves, in order to gain breadth of experience.
+
+**RL Terminology:** The [exploration–exploitation tradeoff](https://en.wikipedia.org/wiki/Exploration%E2%80%93exploitation_dilemma) is fundamental in reinforcement learning (RL). Exploration involves seeking new, uncertain opportunities to discover potential future rewards, while exploitation involves leveraging existing knowledge and resources to secure immediate, known benefits.
+{: .notice--info}
+
+In order to accomplish a higher level of exploration, we can introduce an epsilon parameter in the reinforcement learner which controls the rate at which it explores vs exploits.
