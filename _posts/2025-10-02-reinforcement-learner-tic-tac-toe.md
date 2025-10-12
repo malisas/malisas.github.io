@@ -8,7 +8,7 @@ tags:
 <br>
 # Introduction
 
-This post guides the reader through a proof-of-concept Python implementation of a reinforcement learner that learns to play Tic-Tac-Toe. It is written without using any machine learning packages. The post is intended for people new to reinforcement learning. It emphasizes the essential elements of reinforcement learning (RL), while naturally leading to more complex RL concepts. 
+This post guides the reader through a proof-of-concept Python implementation of a reinforcement learner that learns to play Tic-Tac-Toe. It is intended for people new to reinforcement learning.
 
 ## What is a Reinforcement Learner?
 
@@ -16,31 +16,93 @@ A reinforcement learner is a program that "learns" while it runs, using trial-an
 
 **How a typical human behaves**
 
-When a human plays tic-tac-toe, they enter the game with an understanding of the objective of the game (aim to get 3-in-a-row) and a general strategy. If you put a human in front of this board:
+When a human plays tic-tac-toe, they enter the game with an understanding of the objective of the game (aim to get 3-in-a-row) and a general strategy. When a human sees this board:
 
 ![tictactoe5](/assets/images/tictactoe5.svg){:height="15%" width="15%"}  
 
 they will recognize that <span style="color:blue;">**X**</span> has to block <span style="color:red;">**O**</span> on the next turn by playing the bottom-left, or <span style="color:blue;">**X**</span> will lose.
 
-**How a Reinforcement Learner behaves and learns**
+**How a Reinforcement Learner learns**
 
-When an untrained reinforcement learner is given the same board, it does not know what its objective is. The only thing it can do as player <span style="color:blue;">**X**</span> is place an <span style="color:blue;">**X**</span> in one of the 6 empty spaces on the board. It has no reason to prefer one move over the other, so it will randomly choose a move.
+When an untrained reinforcement learner is shown the same board, it does not know the objective of tic-tac-toe. The only thing it can do is place an <span style="color:blue;">**X**</span> in one of the 6 empty spaces on the board. It has no knowledge about whether one move is better than another, so it will randomly choose a move.
 
 Suppose it randomly chooses the following space as its next move:  
 ![tictactoe6](/assets/images/tictactoe6.gif){:height="15%" width="15%"}  
 <span style="color:red;">**O**</span> then wins on the next move:  
 ![tictactoe7](/assets/images/tictactoe7.gif){:height="15%" width="15%"} 
 
-This will trigger a "game over" state. When this happens, the reinforcement learner will update its future behavior to account for the fact that it lost to <span style="color:red;">**O**</span>. This is how it "learns". After this game (or "episode"), it will be less likely to make the same move in the future. In RL terminology, the agent receives a negative reward for its behavior.
+This will trigger a "game over" state, and the reinforcement learner loses. When this happens, the reinforcement learner will update its future behavior to account for the fact that it lost to <span style="color:red;">**O**</span>. After this game (or "episode"), it will be less likely to make the same move in the future. In RL terminology, the agent receives a negative reward for its behavior. This is how it "learns". 
 
 **RL Terminology:** Episodic tasks in reinforcement learning consist of a sequence of steps that end in a terminal state, after which the agent is rewarded for its performance. 
 {: .notice--info}
 
-To recap, a reinforcement learner does not know the goal of tic-tac-toe. The only thing it can do is try different moves and see if they lead to a win (a reward). If a move leads to a reward, it will update the probability of making that move in future games so that it will be more likely to play the move again.
+To recap, a reinforcement learner does not know the goal of tic-tac-toe. The only thing it can do is try different moves and see if they lead to a win (a reward). After a move leads to a reward, it will update the probability of making that move in future games so that it will be more likely to play the move again.
 
-# Coding the Reinforcement Learner
+# Let's Train a Reinforcement Learner
 
-This section talks about the technical details of coding the reinforcement learner. You can jump straight to the [Results](#results) if you prefer.
+Let's look at how such a reinforcement learner would perform over time. This section will provide context for and motivate the [coding section]() later in the post.
+
+## Performance improves over time
+
+Let's have the reinforcement learner play 100,000 games against a player called `OptimalPlayer` which always plays optimal moves. Every 1,000 games, we'll calculate what proportion of the last 1,000 games the reinforcement learner won, and plot the performance over time.  
+![tictactoe10](/assets/images/tictactoe10.svg)  
+The performance starts out pretty bad, but after 100,000 games, the score is around 0.4.  
+This is not bad, considering that if two optimal players play against each other, every game will end in a tie:  
+![tictactoe12](/assets/images/tictactoe11.svg)  
+
+Let's see if we can get that score even higher by training even longer! Say, 1,500,000 games.  
+After 1,500,000 games of tic-tac-toe, the average score is very close to 0.5:  
+![tictactoe15](/assets/images/tictactoe15.svg)  
+
+That's pretty good! 
+
+## Testing the reinforcement learner
+
+To test the reinforcement learner's performance after 1,500,000 games, let's have the reinforcement learner compete in tournaments against `OptimalPlayer`, `DumbPlayer`, and `MischeviousPlayer`. `DumbPlayer` just plays random moves on every turn, and `MischeviousPlayer` is mischevious!
+
+Let's have the trained reinforcement learner play 20,000 games against each player (note that the reinforcement learner does not learn from games played during tournaments) and plot the percent of games the reinforcement learner won, tied, or lost against each opponent:
+
+---------
+
+Almost all of the games against `OptimalPlayer` end in a tie, as expected. But the tournament against `MischeviousPlayer` has a lot of losses, and it even loses against `DumbPlayer` _% of the time. What's going on?
+
+During training, the reinforcement learner played games against the **Optimal** Player. This optimal player always plays optimal moves which pursue the most win conditions while blocking the opponent's win. This means the reinforcement learner does not have any data about how to respond to suboptimal moves.
+
+Here's one game in which the reinforcement learner lost against `MischeviousPlayer`. `MischeviousPlayer` intentionally plays suboptimal moves. In this game, you can see move _ is suboptimal:
+
+------------
+
+This is a very common pitfall in reinforcement learning; the training process does not expose the reinforcement learner to a wide enough variety of situations, leading to poor performance later on.
+
+How can we train the reinforcement learner so that it can perform better against more opponents?  
+1. We can have the reinforcement learner train against different opponents.
+2. We can also have the reinforcement learner do more intentional "exploring" (next section)...
+
+## Exploration vs Exploitation
+
+The **reinforcement learner**, by its own design, can get stuck playing the same moves over and over again.  
+If the reinforcement learner plays <span style="color:blue;">5</span> on its first turn and it leads to a win, it will be more likely to play <span style="color:blue;">5</span> in the second game, which, if it again leads to a win, will further reinforce the probability of playing space <span style="color:blue;">5</span>...in fact it might never practice playing space <span style="color:blue;">1</span>.  
+It's like walking over the same set of footprints in a snowy field over and over again.  
+![snowyfootsteps](/assets/images/snowy-footsteps.jpg){:height="30%" width="30%"}  
+This behavior is "exploitative", meaning that the reinforcement learner will always be more likely to choose a move that historically led to a higher score. We can instead have it train "exploratively" by increasing its probability of choosing different moves.
+
+**RL Terminology:** The [exploration-exploitation tradeoff](https://en.wikipedia.org/wiki/Exploration%E2%80%93exploitation_dilemma) is fundamental in reinforcement learning. Exploration involves seeking new, uncertain opportunities to discover potential future rewards, while exploitation involves leveraging existing knowledge and resources to secure immediate, known benefits.
+{: .notice--info}
+
+To accomplish a higher level of exploration, we provide an epsilon parameter in the reinforcement learner which controls the rate at which it explores. We'll keep the epsilon parameter high during training to encourage exploration.
+
+## Training and Testing Round 2
+
+Let's have the reinforcement learner continue training, this time against `DumbPlayer`, using the epsilon parameter to accomplish greater exploration.    
+After 1,500,000 training games, let's test the reinforcement learner again:  
+
+-------------
+
+Not perfect, but much better!
+
+# Code
+
+This section talks about the technical details of coding the reinforcement learner and the training and testing functions. The code is written without using machine learning packages.
 
 In order to code and train a reinforcement learner, there are a few software considerations:
 1. The reinforcement learner needs to train by playing a lot of games.
@@ -197,7 +259,7 @@ def softmax(weights):
 In addition to the reinforcement learner, we will provide three opponents:  
 1. `OptimalPlayer` will always choose an optimal move.
 2. `DumbPlayer` will always choose a random move.
-3. `MischeviousPlayer` is mischevious!
+3. `MischeviousPlayer` is mischevious! 😈
 
 Link to the code for these players: [link]()
 
@@ -209,62 +271,9 @@ We also have a `tournament()` function which we will use to test how well our re
 
 Link to this code: [link]()
 
-# Results
-
-## Performance improves over time
-
-Let's have the reinforcement learner play 100,000 games against `OptimalPlayer`. Every 1,000 games, we'll calculate what proportion of the last 1,000 games the reinforcement learner won, and plot the performance over time.  
-![tictactoe10](/assets/images/tictactoe10.svg)  
-After 100,000 games, the score is around 0.4.  
-This is not terrible, considering that if two optimal players play against each other, every game will end in a tie:  
-![tictactoe12](/assets/images/tictactoe11.svg)  
-
-Let's see if we can get that score even higher by training even longer! Say, 1,500,000 games.  
-After 1,500,000 games of tic-tac-toe, the average score is very close to 0.5:  
-![tictactoe15](/assets/images/tictactoe15.svg)  
-
-That's pretty good! 
-
-## Testing the reinforcement learner
-
-Let's test the reinforcement learner by having it compete in tournaments against `OptimalPlayer`, `DumbPlayer`, and `MischeviousPlayer`. We'll have it play 20,000 games against each player (note that the reinforcement learner does not update its policy during tournaments):
-
----------
-
-Almost all of the games against `OptimalPlayer` end in a tie, as expected. But the tournament against `MischeviousPlayer` has a lot of losses, and it even loses against `DumbPlayer` _% of the time. What's going on?
-
-During training, the reinforcement learner played games against the **Optimal** Player. This optimal player always plays optimal moves which pursue the most win conditions while blocking the opponent's win. This means the reinforcement learner does not have any data about how to respond to sub-optimal moves.
-
-Here's one game which the reinforcement learner lost against `MischeviousPlayer`. You can see that move _ is suboptimal:
-
-------------
-
-How can we train the reinforcement learner so that it ready for more situations?
-
-## Exploration vs Exploitation
-
-The **reinforcement learner**, by its own design, can get stuck playing the same moves over and over again.  
-If the reinforcement learner plays <span style="color:blue;">5</span> on its first turn and it leads to a win, it will be more likely to play <span style="color:blue;">5</span> in the second game, which, if it again leads to a win, will further reinforce the probability of playing space <span style="color:blue;">5</span>...in fact it might never practice playing space <span style="color:blue;">1</span>.
-
-This behavior is called "exploitative", meaning that the reinforcement learner will always be more likely to choose a move that historically led to a higher score. We can instead have it train "exploratively" by increasing its probability of choosing different moves.
-
-**RL Terminology:** The [exploration-exploitation tradeoff](https://en.wikipedia.org/wiki/Exploration%E2%80%93exploitation_dilemma) is fundamental in reinforcement learning. Exploration involves seeking new, uncertain opportunities to discover potential future rewards, while exploitation involves leveraging existing knowledge and resources to secure immediate, known benefits.
-{: .notice--info}
-
-To accomplish a higher level of exploration, we can introduce an epsilon parameter in the reinforcement learner which controls the rate at which it explores. We'll keep the epsilon parameter high during training to encourage exploration.
-
-## Training and Testing Round 2
-
-In addition to using the epsilon parameter to accomplish greater exploration, we will also have the reinforcement learner train against `DumbPlayer`.  
-Let's test the reinforcement learner again after another 1,500,000 training games during which epsilon=0.99 and it played against `DumbPlayer`:
-
--------------
-
-Much better!
-
 # Review and Conclusion
 
-In this post we saw how it is possible to write a basic reinforcement learner from scratch in Python. We saw how a reinforcement learner's performance improves over time, and we also observed that it is important to train the reinforcement learner carefully so that it gains experience across a wide range of situations.
+In this post we saw how it is possible to write a basic reinforcement learner from scratch in Python. We saw how a reinforcement learner's performance improves over time, and we also observed that it is important to train a reinforcement learner carefully so that it gains experience across a wide range of situations.
 
 RL Terminology Covered:  
 - Episodic tasks
@@ -272,48 +281,4 @@ RL Terminology Covered:
 - Softmax
 - Exploration-Exploitation Tradeoff
 
-Reinforcement learning is a vast topic and a big research area. Famous reinforcement learners include AlphaGo and even ChatGPT. Hopefully this post can begin to demystify some of the technology behind such software. Thanks for reading!
-
-
-
-
-
-
-
-## The reinforcement learner is only as good as its experience
-
-After 1,500,000 training rounds against the optimal player, the reinforcement learner is consistently getting ties.  
-But suppose a mischevious opponent (😈) now decides to challenge the reinforcement learner to a game!  
-Here's how the game proceeds:  
-![tictactoe16](/assets/images/tictactoe16.svg){:height="50%" width="50%"}  
-The reinforcement learner played some obviously bad moves and lost! What happened?  
-If we look at the policy entries for moves 3 and 5, we see...they don't exist!
-```python
-# Move 3
-'14' in snapshots_rl_v_smart[1500000].policy.keys()
-# False
-
-# Move 5
-'1846' in snapshots_rl_v_smart[1500000].policy.keys()
-# False
-```
-This means the reinforcement learner has never encountered these board states before. The mischevious opponent intentionally played moves that the reinforcement learner had never encountered, and the reinforcement learner therefore picked spaces at random.  
-
-How did this happen? Here are a couple reasons:  
-1. During training, the reinforcement learner played games against the **Optimal** Player. This optimal player always plays optimal moves which pursue the most win conditions while blocking the opponent's win. This strategy is predictable. Knowing this, the mischevious player played a move that it knew the optimal player would not play.
-2. The **reinforcement learner**, by its own design, can also get stuck playing the same moves over and over again.  
-If the reinforcement learner plays <span style="color:blue;">5</span> on its first turn and it leads to a win, it will be more likely to play <span style="color:blue;">5</span> in the second game, which, if it again leads to a win, will further reinforce the probability of playing space <span style="color:blue;">5</span>...in fact it might never get practice playing space <span style="color:blue;">1</span>.
-
-So how can we train the reinforcement learner so that it is exposed to more situations?
-
-## Exploration vs Exploitation
-
-The reinforcement learner currently trains "exploitatively", meaning that it will always be more likely to choose a move that historically led to a higher score. We can instead have it train "exploratively" by increasing its probability of choosing different moves, to gain breadth of experience.
-
-**RL Terminology:** The [exploration–exploitation tradeoff](https://en.wikipedia.org/wiki/Exploration%E2%80%93exploitation_dilemma) is fundamental in reinforcement learning. Exploration involves seeking new, uncertain opportunities to discover potential future rewards, while exploitation involves leveraging existing knowledge and resources to secure immediate, known benefits.
-{: .notice--info}
-
-To accomplish a higher level of exploration, we can introduce an epsilon parameter in the reinforcement learner which controls the rate at which it explores. We'll keep the epsilon parameter high during training to encourage exploration.
-
-## Training Round 2
-
+Reinforcement learning is a vast topic and an active research area. Famous reinforcement learners include AlphaGo and even ChatGPT. Hopefully this post can begin to demystify some of the technology behind such software. Thanks for reading!
