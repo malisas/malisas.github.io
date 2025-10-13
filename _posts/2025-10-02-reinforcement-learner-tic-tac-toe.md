@@ -40,7 +40,9 @@ To recap, a reinforcement learner does not know the goal of tic-tac-toe. The onl
 
 # Let's Train a Reinforcement Learner
 
-This section shows the behavior of a reinforcement learner as it learns to play tic-tac-toe. After this section, the [code section](#code) discusses how to code the reinforcement learner and recreate the behavior shown here.  
+This section shows the behavior of a reinforcement learner as it learns to play tic-tac-toe. After this section, the [code section](#code) discusses how to code the reinforcement learner and recreate this behavior.  
+
+Here's a [direct link](https://html-preview.github.io/?url=https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/ca09fb05c6628e78f53235487dfe3b9cb6452cfd/tic_tac_toe_reinforcement_learner.html#train_and_test_the_rl) to the Jupyter Notebook html section that generates the results for this section.
 
 ## Performance improves over time
 
@@ -112,7 +114,8 @@ The 60.4% loss rate to the mischevious player went down to 8.4%. Not perfect, bu
 # Code
 
 This section talks about the technical details of coding the reinforcement learner and the training and testing functions.  
-Link to Jupyter Notebook with all the Python code: [link](https://gist.github.com/malisas/02f6875656cc2ab8d9e59e909372dc99)
+
+Code was written in a Jupyter Notebook (rendered html version is [here](https://html-preview.github.io/?url=https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/ca09fb05c6628e78f53235487dfe3b9cb6452cfd/tic_tac_toe_reinforcement_learner.html) and raw downloadable notebook is [here](https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/ca09fb05c6628e78f53235487dfe3b9cb6452cfd/tic_tac_toe_reinforcement_learner.ipynb)).
 
 In order to code and train a reinforcement learner, there are a few software considerations:
 1. The reinforcement learner needs to train by playing a lot of games.
@@ -199,7 +202,7 @@ In order to translate these policy entries (summed rewards) into appropriate pro
 **RL Terminology:** The [softmax function](https://en.wikipedia.org/wiki/Softmax_function#Reinforcement_learning) can be used to convert values into action probabilities.
 {: .notice--info}
 
-Putting it all together, the `ReinforcementLearner` class with its immediate dependencies looks like this:  
+Putting it all together, the `ReinforcementLearner` class with its immediate dependencies looks like this ([link to code](https://html-preview.github.io/?url=https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/ca09fb05c6628e78f53235487dfe3b9cb6452cfd/tic_tac_toe_reinforcement_learner.html#reinforcement_learner)):  
 
 {% highlight python linenos %}
 class ReinforcementLearner(Player):
@@ -297,14 +300,14 @@ def softmax(weights):
 
 ## The Opponent
 
-In addition to the reinforcement learner, the code provides three opponents:  
+In addition to the reinforcement learner, we provide three opponent player classes ([link to code](https://html-preview.github.io/?url=https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/ca09fb05c6628e78f53235487dfe3b9cb6452cfd/tic_tac_toe_reinforcement_learner.html#reinforcement_learner)):  
 1. `OptimalPlayer` will always choose an optimal move.
 2. `DumbPlayer` will always choose a random move.
 3. `MischeviousPlayer` is mischevious! 😈
 
 ## Gameplay
 
-Finally, we have a couple functions that take care of game play: `play_game()` plays a single game, and `train_rl()` trains a reinforcement learner against an opponent for a specified number of games.
+Finally, we have a couple functions that take care of game play ([link to code](https://html-preview.github.io/?url=https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/ca09fb05c6628e78f53235487dfe3b9cb6452cfd/tic_tac_toe_reinforcement_learner.html#gameplay_functions)): `play_game()` plays a single game, and `train_rl()` trains a reinforcement learner against an opponent for a specified number of games.
 
 We also have a `tournament()` function which we will use to test how well our reinforcement learner performs after being trained.
 
