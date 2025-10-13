@@ -31,7 +31,7 @@ Suppose it randomly chooses the following space as its next move:
 <span style="color:red;">**O**</span> then wins on the next move:  
 ![tictactoe9](/assets/images/rl_tictactoe/tictactoe9.gif){:height="15%" width="15%"} 
 
-This will trigger a "game over" state, and the reinforcement learner loses. When this happens, the reinforcement learner will update its future behavior to account for the fact that it lost to <span style="color:red;">**O**</span>. After this game (or "episode"), it will be less likely to make the same move in the future. In RL terminology, the agent receives a negative reward for its behavior. This is how it "learns". 
+This will trigger a "game over" state, with a loss for the reinforcement learner. After this happens, the reinforcement learner will update its future behavior to account for the fact that it lost to <span style="color:red;">**O**</span>. After this game (or "episode"), it will be less likely to make the same move in the future. In RL terminology, the agent receives a negative reward for its behavior. This is how it "learns". 
 
 **RL Terminology:** Episodic tasks in reinforcement learning consist of a sequence of steps that end in a terminal state, after which the agent is rewarded for its performance. 
 {: .notice--info}
@@ -64,7 +64,7 @@ That's pretty good!
 
 ## Testing the reinforcement learner
 
-To test the reinforcement learner's performance after 1,000,000 training games, let's have the reinforcement learner compete in 3 tournaments. Each tournament will test the reinforcement learner against a different opponent. the three opponents are `OptimalPlayer`, `DumbPlayer`, and `MischeviousPlayer`.  
+To test the reinforcement learner's performance after 1,000,000 training games, let's have the reinforcement learner compete in 3 tournaments. Each tournament will test the reinforcement learner against a different opponent. The three opponents are `OptimalPlayer`, `DumbPlayer`, and `MischeviousPlayer`.  
 As described earlier, `OptimalPlayer` always plays optimal moves (and will always avoid a loss). `DumbPlayer` plays random moves on every turn, while `MischeviousPlayer` is mischevious!
 
 Let's have the trained reinforcement learner play 20,000 games against each player\* and plot the percent of games the reinforcement learner won, tied, or lost against each opponent:  
@@ -237,6 +237,7 @@ class ReinforcementLearner(Player):
         weights = [self.policy[board_str][key] for key in possible_moves]
         next_move = random.choices(possible_moves, weights=softmax(weights), k=1)[0]
         board[player_idx].append(next_move)
+
     def update_policy(self, game_state, board, player_idx):
         """
         Updates the player's policy based on game outcome
@@ -267,6 +268,7 @@ class ReinforcementLearner(Player):
                     policy_key, board_before_ith_move
                 )
                 self.policy[policy_key][ith_move] += current_reward
+                
     def initialize_policy_entry_if_missing(self, policy_key, current_board):
         if not policy_key in self.policy:
             possible_moves = set(get_available_moves(current_board))
