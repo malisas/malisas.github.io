@@ -68,17 +68,18 @@ To test the reinforcement learner's performance after 1,000,000 training games, 
 As described earlier, `OptimalPlayer` always plays optimal moves (and will always avoid a loss). `DumbPlayer` plays random moves on every turn, while `MischeviousPlayer` is mischevious!
 
 Let's have the trained reinforcement learner play 20,000 games against each player\* and plot the percent of games the reinforcement learner won, tied, or lost against each opponent:  
-\*<sub> Note that the reinforcement learner does not learn from games played during tournaments</sub>
+\* <sub> Note that the reinforcement learner does not learn from games played during tournaments.</sub>
 
 ![tictactoe4](/assets/images/rl_tictactoe/tictactoe4.svg)  
 
-The left-most barplot shows that almost all of the games against `OptimalPlayer` end in a tie, as expected. But the reinfrocement learner loses >60% of the time against `MischeviousPlayer`, and it even loses against `DumbPlayer` >35% of the time. What's going on?
+The left-most barplot shows that almost all of the games against `OptimalPlayer` end in a tie, as expected. But the reinforcement learner loses >60% of the time against `MischeviousPlayer`, and it even loses against `DumbPlayer` >35% of the time. What's going on?
 
 During training, the reinforcement learner played games against the *optimal* player. The optimal player always plays optimal moves which pursue the most win conditions while blocking the opponent's win. This means the reinforcement learner did not get any experience responding to suboptimal moves played by the opponent.
 
-Here's one game in which the reinforcement learner (<span style="color:blue;">**R**</span>) lost against `MischeviousPlayer` (😈). `MischeviousPlayer` is mischevious because it intentionally plays suboptimal moves. In this game, move 2 is suboptimal:
+Here's one game in which the reinforcement learner (<span style="color:blue;">**R**</span>) lost against `MischeviousPlayer` (😈). `MischeviousPlayer` is mischevious because it intentionally plays suboptimal moves. In this game, move 2 is suboptimal\*:
 
 ![tictactoe5](/assets/images/rl_tictactoe/tictactoe5.svg){:height="60%" width="60%"}   
+\* <sub>Move 2 is suboptimal because it is possible for an opponent to force a win by playing the center space on the next move.</sub>
 
 This is a very common pitfall in reinforcement learning; when the training process does not expose the reinforcement learner to a wide variety of situations, it can lead to poor performance later on.
 
@@ -143,7 +144,7 @@ We can use the following list representation of the board:
 ```
 board = [[7,6],[5,9]]
 ```
-Here it is taken to mean that player 1 (<span style="color:blue;">**X**</span>) played <span style="color:blue;">`7`</span> on their first move, followed by <span style="color:blue;">`6`</span> on their next turn.  
+Here it is taken to mean that player 1 (<span style="color:blue;">**X**</span>) played <span style="color:blue;">`7`</span> on their first move, followed by <span style="color:blue;">`6`</span> on their next turn. And player 2 <span style="color:red;">**O**</span> played <span style="color:red;">`5`</span> on their first turn, followed by <span style="color:red;">`9`</span> on their second turn.  
 We will use this representation to track the in-game state of the board. We use a list because it's easy to append to.
 
 **Representation 2 (when move order does not matter):**  
@@ -157,8 +158,8 @@ By "ignoring move order", it means that the following two games:
 [[7,6],[5,9]]
 [[6,7],[5,9]]
 ```
-are represented by the single string above.  
-We will use this representation as the key to our policy dictionary (discussed later). We purposely ignore the move order in the policy dictionary because the historical order of the moves does not affect what the "best" move will be on the player's next move. The list has been converted to a string because a list cannot be a dictionary key.  
+are represented by the single string above. We will use this representation as the key to our policy dictionary (discussed later). The list has been converted to a string because a list cannot be a dictionary key.  
+We purposely ignore the move order in the policy dictionary because the historical order of the moves does not affect what the "best" move will be on the player's next move. However, note that player 1's moves (<span style="color:blue;">`6`</span> and <span style="color:blue;">`7`</span>) are in the first half of the string; we do want to preserve information about which player has played which moves.
 
 Now if you see `board` and `board_str` in the code, you'll know what they are referring to.  
 
