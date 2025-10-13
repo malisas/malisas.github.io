@@ -8,7 +8,7 @@ tags:
 <br>
 # Introduction
 
-This post guides the reader through a proof-of-concept Python implementation of a reinforcement learner that learns to play Tic-Tac-Toe. It is intended for people new to reinforcement learning.
+This post guides the reader through a proof-of-concept Python implementation of a reinforcement learner that learns to play Tic-Tac-Toe. The code is written without using machine learning packages, and it is intended for people new to reinforcement learning.  
 
 ## What is a Reinforcement Learner?
 
@@ -36,11 +36,11 @@ This will trigger a "game over" state, and the reinforcement learner loses. When
 **RL Terminology:** Episodic tasks in reinforcement learning consist of a sequence of steps that end in a terminal state, after which the agent is rewarded for its performance. 
 {: .notice--info}
 
-To recap, a reinforcement learner does not know the goal of tic-tac-toe. The only thing it can do is try different moves and see if they lead to a win (a reward). After a move leads to a reward, it will update the probability of making that move in future games so that it will be more likely to play the move again.
+To recap, a reinforcement learner does not know the goal of tic-tac-toe. The only thing it can do is try different moves and see if they lead to a win (or a positive reward). If a move leads to a positive reward, it will update the probability of making that move in future games so that it will be more likely to play the move again.
 
 # Let's Train a Reinforcement Learner
 
-Let's look at how such a reinforcement learner would perform over time. This section will provide context for and motivate the [coding section]() later in the post.
+This section shows the behavior of a reinforcement learner as it learns to play tic-tac-toe. After this section, the [code section](#code) discusses how to code the reinforcement learner and recreate the behavior shown here.  
 
 ## Performance improves over time
 
@@ -49,11 +49,11 @@ Let's have the reinforcement learner play 100,000 games against a player called 
 ![tictactoe1](/assets/images/rl_tictactoe/tictactoe1.svg)  
 
 The performance starts out pretty bad, but after 100,000 games, the score is around 0.4.  
-This is not bad, considering that if two optimal players play against each other, every game will end in a tie:  
+This is not bad, considering that if two optimal players play against each other, every game will end in a tie (0.5):  
 
 ![tictactoe2](/assets/images/rl_tictactoe/tictactoe2.svg)  
 
-Let's see if we can get that score even higher by training even longer! Say, 1,000,000 games.  
+Can we can get that score even higher by training even longer? Let's continue training until the reinforcement learner plays 1,000,000 games.  
 After 1,000,000 games of tic-tac-toe, the average score is very close to 0.5:  
 
 ![tictactoe3](/assets/images/rl_tictactoe/tictactoe3.svg)  
@@ -62,38 +62,43 @@ That's pretty good!
 
 ## Testing the reinforcement learner
 
-To test the reinforcement learner's performance after 1,500,000 games, let's have the reinforcement learner compete in tournaments against `OptimalPlayer`, `DumbPlayer`, and `MischeviousPlayer`. `DumbPlayer` just plays random moves on every turn, and `MischeviousPlayer` is mischevious!
+To test the reinforcement learner's performance after 1,000,000 training games, let's have the reinforcement learner compete in 3 tournaments. Each tournament will test the reinforcement learner against a different opponent. the three opponents are `OptimalPlayer`, `DumbPlayer`, and `MischeviousPlayer`.  
+As described earlier, `OptimalPlayer` always plays optimal moves (and will always avoid a loss). `DumbPlayer` plays random moves on every turn, while `MischeviousPlayer` is mischevious!
 
-Let's have the trained reinforcement learner play 20,000 games against each player (note that the reinforcement learner does not learn from games played during tournaments) and plot the percent of games the reinforcement learner won, tied, or lost against each opponent:
+Let's have the trained reinforcement learner play 20,000 games against each player\* and plot the percent of games the reinforcement learner won, tied, or lost against each opponent:  
+\*<sub> Note that the reinforcement learner does not learn from games played during tournaments</sub>
 
 ![tictactoe4](/assets/images/rl_tictactoe/tictactoe4.svg)  
 
-Almost all of the games against `OptimalPlayer` end in a tie, as expected. But the tournament against `MischeviousPlayer` has a lot of losses, and it even loses against `DumbPlayer` _% of the time. What's going on?
+The left-most barplot shows that almost all of the games against `OptimalPlayer` end in a tie, as expected. But the reinfrocement learner loses >60% of the time against `MischeviousPlayer`, and it even loses against `DumbPlayer` >35% of the time. What's going on?
 
-During training, the reinforcement learner played games against the **Optimal** Player. This optimal player always plays optimal moves which pursue the most win conditions while blocking the opponent's win. This means the reinforcement learner does not have any data about how to respond to suboptimal moves.
+During training, the reinforcement learner played games against the *optimal* player. The optimal player always plays optimal moves which pursue the most win conditions while blocking the opponent's win. This means the reinforcement learner did not get any experience responding to suboptimal moves played by the opponent.
 
-Here's one game in which the reinforcement learner lost against `MischeviousPlayer`. `MischeviousPlayer` intentionally plays suboptimal moves. In this game, move 2 is actually suboptimal:
+Here's one game in which the reinforcement learner (<span style="color:blue;">**R**</span>) lost against `MischeviousPlayer` (😈). `MischeviousPlayer` is mischevious because it intentionally plays suboptimal moves. In this game, move 2 is suboptimal:
 
 ![tictactoe5](/assets/images/rl_tictactoe/tictactoe5.svg){:height="60%" width="60%"}   
 
-This is a very common pitfall in reinforcement learning; the training process does not expose the reinforcement learner to a wide enough variety of situations, leading to poor performance later on.
+This is a very common pitfall in reinforcement learning; when the training process does not expose the reinforcement learner to a wide variety of situations, it can lead to poor performance later on.
 
-How can we train the reinforcement learner so that it can perform better against more opponents?  
+How can we train the reinforcement learner so that it can perform better, against many different opponents?  
 1. We can have the reinforcement learner train against different opponents.
 2. We can also have the reinforcement learner do more intentional "exploring" (next section)...
 
 ## Exploration vs Exploitation
 
-The **reinforcement learner**, by its own design, can get stuck playing the same moves over and over again.  
-If the reinforcement learner plays <span style="color:blue;">5</span> on its first turn and it leads to a win, it will be more likely to play <span style="color:blue;">5</span> in the second game, which, if it again leads to a win, will further reinforce the probability of playing space <span style="color:blue;">5</span>...in fact it might never practice playing space <span style="color:blue;">1</span>.  
-It's like walking over the same set of footprints in a snowy field over and over again.  
-![snowyfootsteps](/assets/images/snowy-footsteps.jpg){:height="30%" width="30%"}  
-This behavior is "exploitative", meaning that the reinforcement learner will always be more likely to choose a move that historically led to a higher score. We can instead have it train "exploratively" by increasing its probability of choosing different moves.
+The *reinforcement learner*, by its own design, can get stuck playing the same moves over and over again.  
+If a reinforcement learner plays <span style="color:blue;">5</span> on its first turn and it leads to a win, it will be more likely to play <span style="color:blue;">5</span> in the second game, which, if it again leads to a win, will further reinforce the probability of playing space <span style="color:blue;">5</span>...in fact it might never see what happens if it plays space <span style="color:blue;">1</span>.  
+
+It's like walking over the same set of footprints in a snowy field over and over again because you know it's safe.  
+![snowyfootsteps](/assets/images/rl_tictactoe/snowy-footsteps.jpg){:height="30%" width="30%"}  
+This behavior is "exploitative", meaning that the reinforcement learner will always be more likely to choose a move that historically led to a higher score.  
+
+We can instead have it train "exploratively" by increasing its probability of choosing different moves.
 
 **RL Terminology:** The [exploration-exploitation tradeoff](https://en.wikipedia.org/wiki/Exploration%E2%80%93exploitation_dilemma) is fundamental in reinforcement learning. Exploration involves seeking new, uncertain opportunities to discover potential future rewards, while exploitation involves leveraging existing knowledge and resources to secure immediate, known benefits.
 {: .notice--info}
 
-To accomplish a higher level of exploration, we provide an epsilon parameter in the reinforcement learner which controls the rate at which it explores. We'll keep the epsilon parameter high during training to encourage exploration.
+To accomplish a higher level of exploration, we can provide an epsilon parameter in the reinforcement learner which controls the rate at which it explores. We'll keep the epsilon parameter high during training to encourage exploration.
 
 ## Training and Testing Round 2
 
@@ -102,16 +107,16 @@ After 1,000,000 training games, let's test the reinforcement learner again:
 
 ![tictactoe6](/assets/images/rl_tictactoe/tictactoe6.svg)  
 
-Not perfect, but much better!
+The 60.4% loss rate to the mischevious player went down to 8.4%. Not perfect, but much better!
 
 # Code
 
-This section talks about the technical details of coding the reinforcement learner and the training and testing functions. The code is written without using machine learning packages.  
+This section talks about the technical details of coding the reinforcement learner and the training and testing functions.  
 Link to Jupyter Notebook with all the Python code: [link](https://gist.github.com/malisas/02f6875656cc2ab8d9e59e909372dc99)
 
 In order to code and train a reinforcement learner, there are a few software considerations:
 1. The reinforcement learner needs to train by playing a lot of games.
-2. The reinforcement learner needs some way to store its learnings (e.g. updated probabilities) across games. The technical terminology for this is a `policy`, which we will define here as a dictionary that maps each board state to a set of possible moves and their evolving probabilities/weights.
+2. The reinforcement learner needs some way to store its learnings (e.g. updated rewards and probabilities) across games. The technical terminology for this is a `policy`, which we will define here as a dictionary that maps each board state to a set of possible moves and their evolving rewards/probabilities.
 3. The reinforcement learner also needs an opponent.
 
 **RL Terminology:** A policy is the strategy an agent uses to decide actions. A policy maps states to possible actions and their probabilities.
@@ -159,7 +164,7 @@ Now if you see `board` and `board_str` in the code, you'll know what they are re
 Now let's write the reinforcement learner.
 
 The `ReinforcementLearner` class has two main functions: `move` and `update_policy`.  
-- The `move` function accepts the current `board` and looks up its entry in `self.policy`. It will then choose randomly from the moves available for the current board, weighted by the values in `self.policy`.  
+- The `move()` function accepts the current `board` and looks up its entry in `self.policy`. It will then choose randomly from the moves available for the current board, weighted by the values in `self.policy`.  
 An example of a possible `policy` entry for the following board is 
 ```
 {'6759': {1: 0.525,
@@ -170,10 +175,10 @@ An example of a possible `policy` entry for the following board is
 ```
 ![tictactoe11](/assets/images/rl_tictactoe/tictactoe11.svg){:height="15%" width="15%"}  
 Here we see the dictionary entry for `'6759'` contains another dictionary in which a weight is assigned for each available move (1, 2, 3, 4, and 8).
-- The `update_policy` function is run after each game of tic-tac-toe. If the reinforcement learner wins a game, it will be "rewarded" by positively incrementing the weight of the moves it made (in `self.policy`).   
-Note that not all moves are rewarded equally. For the following board where <span style="color:blue;">**X**</span> won (represented by `[[6,7,1,4],[5,9,2]]`), the winning move <span style="color:blue;">`4`</span> is awarded a full 0.1 points, the second-to-last move is awarded 0.05 points, all the way down to 0.0125 points for the first move (<span style="color:blue;">`6`</span>).  
+- The `update_policy()` function is run after each game of tic-tac-toe. If the reinforcement learner wins a game, it will be "rewarded" by positively incrementing the weight of the moves it made (in `self.policy`).<br>   
+**Note:** Not all moves are rewarded equally. Moves later in the game (e.g. the winning move) receive the greatest reward. For the following board where <span style="color:blue;">**X**</span> won (represented by `[[6,7,1,4],[5,9,2]]`), the winning move on space <span style="color:blue;">`4`</span> is awarded a full 0.1 points, the second-to-last move is awarded 0.05 points, all the way down to 0.0125 points for the first move (<span style="color:blue;">`6`</span>).  
 ![tictactoe13](/assets/images/rl_tictactoe/tictactoe13.svg){:height="60%" width="60%"}   
-- By the way, the policy entry does not actually contain probabilities. It's just the sum of all the rewards that have been applied. In fact it's possible for the policy entry to contain negative values:
+- Technical note: The policy entry does not contain probabilities. The policy entry holds the sum of all the rewards from `update_policy()`. It's possible for a policy entry to contain negative values (e.g. if the reinforcement learner loses a lot). But probabilities cannot be negative, so these values cannot be used directly for move selection! 🤔   
 ```
 {'6759': {1: 4.17,
           2: -5.37,
@@ -181,7 +186,7 @@ Note that not all moves are rewarded equally. For the following board where <spa
           4: -3.95,
           8: -5.52}}
 ```
-This doesn't translate directly to appropriate probabilities for choosing each move. So we will convert these values to actual probabilities using the `softmax` function, which is commonly used in RL. Here you can see how the policy values turn into appropriate probabilities after applying the softmax function:
+In order to translate these policy entries (summed rewards) into appropriate probabilities for choosing moves, the code uses the `softmax()` function, which is commonly used in RL for this purpose. Here you can see how the policy values turn into appropriate probabilities after applying the softmax function:
 
 | Move | Policy Value | Softmax |
 |---:|---:|---:|
@@ -194,43 +199,70 @@ This doesn't translate directly to appropriate probabilities for choosing each m
 **RL Terminology:** The [softmax function](https://en.wikipedia.org/wiki/Softmax_function#Reinforcement_learning) can be used to convert values into action probabilities.
 {: .notice--info}
 
-Putting it all together, the `ReinforcementLearner` class looks like this:  
-([link]() to the corresponding code in a Jupyter Notebook, slightly modified for additional functionality)
+Putting it all together, the `ReinforcementLearner` class with its immediate dependencies looks like this:  
 
 {% highlight python linenos %}
 class ReinforcementLearner(Player):
-    def __init__(self, name=None):
+    """
+    ReinforcementLearner learns by playing.
+    If a given move leads to a win, it will be more likely to
+    play that move in the future.
+    """
+    def __init__(self, name=None, epsilon=0):
         super().__init__(name)
+        # self.policy is a dictionary that maps each board state
+        # to a set of possible moves and their evolving rewards
         self.policy = {}
+        # self.epsilon controls the probability of exploration vs exploitation.
+        # self.epsilon=1 means 100% exploration.
+        # self.epislon=0 means 100% exploitation (never ignore self.policy).
+        self.epsilon = epsilon
+
     def move(self, board):
-            board_str = board_to_str(board)
-            self.initialize_policy_entry_if_missing(board_str, board)
-            player_idx = len(board_str) % 2
-            possible_moves = list(self.policy[board_str].keys())
-            # Weights must be non-negative and can't all be 0
-            weights = softmax([self.policy[board_str][key] for key in possible_moves])
-            # The player chooses randomly from the available moves, weighted
-            # by the softmax of the associated policy entry
-            next_move = random.choices(possible_moves,
-                           weights=weights,
-                           k=1)[0]
-            # The player appends its next move to the board
-            board[player_idx].append(next_move) 
-    def update_policy(self, game_status, board, player_idx):
-        if game_status != "Tie":
+        """
+        Chooses and adds the player's next move to board
+        """
+        board_str = get_board_str(board)
+        self.initialize_policy_entry_if_missing(board_str, board)
+        possible_moves = list(self.policy[board_str].keys())
+        player_idx = len(board_str) % 2
+        # Make a random move with probability epsilon
+        if (self.epsilon != 0) & (random.random() < self.epsilon):
+            board[player_idx].append(random_move(possible_moves))
+            return
+        # Weights must be non-negative and can't all be 0
+        weights = [self.policy[board_str][key] for key in possible_moves]
+        next_move = random.choices(possible_moves, weights=softmax(weights), k=1)[0]
+        board[player_idx].append(next_move)
+    def update_policy(self, game_state, board, player_idx):
+        """
+        Updates the player's policy based on game outcome
+        """
+        if game_state != "Tie":
             # If the player lost, penalize each move the player took.
             # If the player won, reward each move the player took.
-            reward_sign = -1 if ((game_status == "Player 1 Win") & (player_idx == 1)) | ((game_status == "Player 2 Win") & (player_idx == 0)) else 1
+            reward_sign = (
+                -1
+                if ((game_state == "Player 1 Win") & (player_idx == 1))
+                | ((game_state == "Player 2 Win") & (player_idx == 0))
+                else 1
+            )
             # How many moves did the player take before winning/losing?
             num_moves = len(board[player_idx])
             for i in range(num_moves):
-                board_before_ith_move = [board[0][0:i+1],board[1][0:i]] if player_idx == 1 else [board[0][0:i],board[1][0:i]]
+                board_before_ith_move = (
+                    [board[0][0 : i + 1], board[1][0:i]]
+                    if player_idx == 1
+                    else [board[0][0:i], board[1][0:i]]
+                )
                 ith_move = board[player_idx][i]
-                policy_key = board_to_str(board_before_ith_move)
+                policy_key = get_board_str(board_before_ith_move)
                 # Apply a weaker reward/penalty for earlier moves
-                reward_multiplier = (0.5**(num_moves-1-i))*0.1
-                current_reward = reward_sign*reward_multiplier
-                self.initialize_policy_entry_if_missing(policy_key, board_before_ith_move)
+                reward_multiplier = (0.5 ** (num_moves - 1 - i)) * 0.1
+                current_reward = reward_sign * reward_multiplier
+                self.initialize_policy_entry_if_missing(
+                    policy_key, board_before_ith_move
+                )
                 self.policy[policy_key][ith_move] += current_reward
     def initialize_policy_entry_if_missing(self, policy_key, current_board):
         if not policy_key in self.policy:
@@ -241,12 +273,20 @@ class Player:
     def __init__(self, name=None):
         self.name = name
 
-def board_to_str(board):
-    # [[3,5,2],[9,4]] would become '23549'
-    # Each player's turns are individually sorted, and then concatenated
+def get_board_str(board):
+    """
+    Turn board into a simpler integer that can be used
+    as a dictionary key and ignores move order.
+    [[3,5,2],[9,4]] would become '23549'.
+    Each player's turns are sorted and then concatenated
+    """
     return "".join([str(num) for num in sorted(board[0]) + sorted(board[1])])
 
 def softmax(weights):
+    """
+    The softmax function is used to convert values into action probabilities
+    (slightly simplified here for readability)
+    """
     weights_softmax = [math.e**(x) for x in weights]
     divisor = sum(weights_softmax)
     weights_softmax = [x / divisor for x in weights_softmax]
@@ -257,12 +297,10 @@ def softmax(weights):
 
 ## The Opponent
 
-In addition to the reinforcement learner, we will provide three opponents:  
+In addition to the reinforcement learner, the code provides three opponents:  
 1. `OptimalPlayer` will always choose an optimal move.
 2. `DumbPlayer` will always choose a random move.
 3. `MischeviousPlayer` is mischevious! 😈
-
-Link to the code for these players: [link]()
 
 ## Gameplay
 
