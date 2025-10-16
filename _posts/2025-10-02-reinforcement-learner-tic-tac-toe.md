@@ -10,6 +10,8 @@ tags:
 
 This post guides the reader through a proof-of-concept Python implementation of a reinforcement learner that learns to play Tic-Tac-Toe. The code is written without using machine learning packages, and it is intended for people new to reinforcement learning.  
 
+Pre-requisites: Know the rules of tic-tac-toe, and have some coding experience.
+
 ## What is a Reinforcement Learner?
 
 A reinforcement learner is a program that "learns" while it runs, using trial-and-error. Let's contrast this to how a human behaves:
@@ -18,7 +20,7 @@ A reinforcement learner is a program that "learns" while it runs, using trial-an
 
 When a human plays tic-tac-toe, they enter the game with an understanding of the objective of the game (aim to get 3-in-a-row) and a general strategy. When a human sees this board:
 
-![tictactoe7](/assets/images/rl_tictactoe/tictactoe7.svg){:height="15%" width="15%"}  
+![tictactoe7](/assets/images/rl_tictactoe/tictactoe7.svg){:height="20%" width="20%"}  
 
 they will recognize that <span style="color:blue;">**X**</span> has to block <span style="color:red;">**O**</span> on the next turn by playing the bottom-left, or <span style="color:blue;">**X**</span> will lose.
 
@@ -27,9 +29,9 @@ they will recognize that <span style="color:blue;">**X**</span> has to block <sp
 When an untrained reinforcement learner is shown the same board, it does not know the objective of tic-tac-toe. The only thing it can do is place an <span style="color:blue;">**X**</span> in one of the 6 empty spaces on the board. It has no knowledge about whether one move is better than another, so it will randomly choose a move.
 
 Suppose it randomly chooses the following space as its next move:  
-![tictactoe8](/assets/images/rl_tictactoe/tictactoe8.gif){:height="15%" width="15%"}  
+![tictactoe8](/assets/images/rl_tictactoe/tictactoe8.gif){:height="20%" width="20%"}  
 <span style="color:red;">**O**</span> then wins on the next move:  
-![tictactoe9](/assets/images/rl_tictactoe/tictactoe9.gif){:height="15%" width="15%"} 
+![tictactoe9](/assets/images/rl_tictactoe/tictactoe9.gif){:height="25%" width="25%"} 
 
 This will trigger a "game over" state, with a loss for the reinforcement learner. After this happens, the reinforcement learner will update its future behavior to account for the fact that it lost to <span style="color:red;">**O**</span>. After this game (or "episode"), it will be less likely to make the same move in the future. In RL terminology, the agent receives a negative reward for its behavior. This is how it "learns". 
 
@@ -42,11 +44,11 @@ To recap, a reinforcement learner does not know the goal of tic-tac-toe. The onl
 
 This section shows the behavior of a reinforcement learner as it learns to play tic-tac-toe. After this section, the [code section](#code) discusses how to code the reinforcement learner and recreate this behavior.  
 
-Here's a [direct link](https://htmlpreview.github.io/?https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/ca09fb05c6628e78f53235487dfe3b9cb6452cfd/tic_tac_toe_reinforcement_learner.html#train_and_test_the_rl) to the Jupyter Notebook html section that generates the results for this section.
+Here's a [direct link](https://htmlpreview.github.io/?https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/702565a725da516775de816ce88e35fa11ae3c5a/tic_tac_toe_reinforcement_learner.html#train_and_test_the_rl) to the Jupyter Notebook html section that generates the results for this section.
 
 ## Performance improves over time
 
-Let's have the reinforcement learner play 100,000 games against a player called `OptimalPlayer` which always plays optimal moves. Every 1,000 games, we'll calculate what proportion of the last 1,000 games the reinforcement learner won, and plot the performance over time.  
+Let's have the reinforcement learner play 100,000 games against a player called `OptimalPlayer` which always plays optimal moves. Every 1,000 games, we'll calculate what proportion of the last 1,000 games the reinforcement learner won, and plot the performance over time. For exact details about   
 
 ![tictactoe1](/assets/images/rl_tictactoe/tictactoe1.svg)  
 
@@ -64,15 +66,15 @@ That's pretty good!
 
 ## Testing the reinforcement learner
 
-To test the reinforcement learner's performance after 1,000,000 training games, let's have the reinforcement learner compete in 3 tournaments. Each tournament will test the reinforcement learner against a different opponent. The three opponents are `OptimalPlayer`, `DumbPlayer`, and `MischeviousPlayer`.  
-As described earlier, `OptimalPlayer` always plays optimal moves (and will always avoid a loss). `DumbPlayer` plays random moves on every turn, while `MischeviousPlayer` is mischevious!
+To test the reinforcement learner's performance after 1,000,000 training games, let's have the reinforcement learner compete in 3 tournaments. Each tournament will test the reinforcement learner against a different opponent. The three opponents are `OptimalPlayer`, `RandomPlayer`, and `MischeviousPlayer`.  
+As described earlier, `OptimalPlayer` always plays optimal moves (and will always avoid a loss). `RandomPlayer` plays random moves on every turn, while `MischeviousPlayer` is mischevious!
 
 Let's have the trained reinforcement learner play 20,000 games against each player\* and plot the percent of games the reinforcement learner won, tied, or lost against each opponent:  
 \* <sub> Note that the reinforcement learner does not learn from games played during tournaments.</sub>
 
 ![tictactoe4](/assets/images/rl_tictactoe/tictactoe4.svg)  
 
-The left-most barplot shows that almost all of the games against `OptimalPlayer` end in a tie, as expected. But the reinforcement learner loses >60% of the time against `MischeviousPlayer`, and it even loses against `DumbPlayer` >35% of the time. What's going on?
+The left-most barplot shows that almost all of the games against `OptimalPlayer` end in a tie, as expected. But the reinforcement learner loses >60% of the time against `MischeviousPlayer`, and it even loses against `RandomPlayer` >35% of the time. What's going on?
 
 During training, the reinforcement learner played games against the *optimal* player. The optimal player always plays optimal moves which pursue the most win conditions while blocking the opponent's win. This means the reinforcement learner did not get any experience responding to suboptimal moves played by the opponent.
 
@@ -92,10 +94,6 @@ How can we train the reinforcement learner so that it can perform better, agains
 The *reinforcement learner*, by its own design, can get stuck playing the same moves over and over again.  
 If a reinforcement learner plays <span style="color:blue;">5</span> on its first turn and it leads to a win, it will be more likely to play <span style="color:blue;">5</span> in the second game, which, if it again leads to a win, will further reinforce the probability of playing space <span style="color:blue;">5</span>...in fact it might never see what happens if it plays space <span style="color:blue;">1</span>.  
 
-It's like walking over the same set of footprints in a snowy field over and over again because you know it's safe.  
-![snowyfootsteps](/assets/images/rl_tictactoe/snowy-footsteps.jpg){:height="30%" width="30%"}  
-This behavior is "exploitative", meaning that the reinforcement learner will always be more likely to choose a move that historically led to a higher score.  
-
 We can instead have it train "exploratively" by increasing its probability of choosing different moves.
 
 **RL Terminology:** The [exploration-exploitation tradeoff](https://en.wikipedia.org/wiki/Exploration%E2%80%93exploitation_dilemma) is fundamental in reinforcement learning. Exploration involves seeking new, uncertain opportunities to discover potential future rewards, while exploitation involves leveraging existing knowledge and resources to secure immediate, known benefits.
@@ -105,7 +103,7 @@ To accomplish a higher level of exploration, we can provide an epsilon parameter
 
 ## Training and Testing Round 2
 
-Let's have the reinforcement learner continue training, this time against `DumbPlayer`, using the epsilon parameter to accomplish greater exploration.    
+Let's have the reinforcement learner continue training, this time against `RandomPlayer`, using the epsilon parameter to accomplish greater exploration.    
 After 1,000,000 training games, let's test the reinforcement learner again:  
 
 ![tictactoe6](/assets/images/rl_tictactoe/tictactoe6.svg)  
@@ -116,7 +114,7 @@ The 60.4% loss rate to the mischevious player went down to 8.4%. Not perfect, bu
 
 This section talks about the technical details of coding the reinforcement learner and the training and testing functions.  
 
-Code was written in a Jupyter Notebook (rendered html version is [here](https://htmlpreview.github.io/?https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/ca09fb05c6628e78f53235487dfe3b9cb6452cfd/tic_tac_toe_reinforcement_learner.html) and raw downloadable notebook is [here](https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/ca09fb05c6628e78f53235487dfe3b9cb6452cfd/tic_tac_toe_reinforcement_learner.ipynb)).
+Code was written in a Jupyter Notebook (rendered html version is [here](https://htmlpreview.github.io/?https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/702565a725da516775de816ce88e35fa11ae3c5a/tic_tac_toe_reinforcement_learner.html) and raw downloadable notebook is [here](https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/702565a725da516775de816ce88e35fa11ae3c5a/tic_tac_toe_reinforcement_learner.ipynb)).
 
 In order to code and train a reinforcement learner, there are a few software considerations:
 1. The reinforcement learner needs to train by playing a lot of games.
@@ -132,11 +130,11 @@ Taking these requirements at face value, we can write a program that fulfills th
 
 There needs to be a way to represent the tic-tac-toe board using code.  
 One approach is to consider the board as a grid with spots numbered 1 through 9:  
-![tictactoe10](/assets/images/rl_tictactoe/tictactoe10.svg){:height="15%" width="15%"}  
+![tictactoe10](/assets/images/rl_tictactoe/tictactoe10.svg){:height="20%" width="20%"}  
 Now suppose we want to represent the following game state:  
-![tictactoe11](/assets/images/rl_tictactoe/tictactoe11.svg){:height="15%" width="15%"}  
+![tictactoe11](/assets/images/rl_tictactoe/tictactoe11.svg){:height="20%" width="20%"}  
 Let's say <span style="color:blue;">**X**</span> played first in space <span style="color:blue;">`7`</span>, followed by <span style="color:red;">**O**</span> in <span style="color:red;">`5`</span>, and so on, like this:  
-![tictactoe12](/assets/images/rl_tictactoe/tictactoe12.gif){:height="20%" width="20%"}  
+![tictactoe12](/assets/images/rl_tictactoe/tictactoe12.gif){:height="25%" width="25%"}  
 
 **Representation 1 (move order does matter):**  
 
@@ -144,8 +142,8 @@ We can use the following list representation of the board:
 ```
 board = [[7,6],[5,9]]
 ```
-Here it is taken to mean that player 1 (<span style="color:blue;">**X**</span>) played <span style="color:blue;">`7`</span> on their first move, followed by <span style="color:blue;">`6`</span> on their next turn. And player 2 <span style="color:red;">**O**</span> played <span style="color:red;">`5`</span> on their first turn, followed by <span style="color:red;">`9`</span> on their second turn.  
-We will use this representation to track the in-game state of the board. We use a list because it's easy to append to.
+Here it is taken to mean that player 1 (<span style="color:blue;">**X**</span>) played <span style="color:blue;">`7`</span> on their first move, followed by <span style="color:blue;">`6`</span> on their next turn. And player 2 (<span style="color:red;">**O**</span>) played <span style="color:red;">`5`</span> on their first turn, followed by <span style="color:red;">`9`</span> on their second turn.  
+We will use this representation to track the in-game state of the board, and the move order information is used to apply rewards in the `update_policy()` function described later.
 
 **Representation 2 (when move order does not matter):**  
 
@@ -177,12 +175,12 @@ An example of a possible `policy` entry for the following board is
           4: 0.45,
           8: 0.425}}
 ```
-![tictactoe11](/assets/images/rl_tictactoe/tictactoe11.svg){:height="15%" width="15%"}  
-Here we see the dictionary entry for `'6759'` contains another dictionary in which a weight is assigned for each available move (1, 2, 3, 4, and 8).
+![tictactoe11](/assets/images/rl_tictactoe/tictactoe11.svg){:height="20%" width="20%"}  
+The dictionary entry for `'6759'` contains another dictionary in which a weight is assigned for each available move (1, 2, 3, 4, and 8).
 - The `update_policy()` function is run after each game of tic-tac-toe. If the reinforcement learner wins a game, it will be "rewarded" by positively incrementing the weight of the moves it made (in `self.policy`).<br>   
-**Note:** Not all moves are rewarded equally. Moves later in the game (e.g. the winning move) receive the greatest reward. For the following board where <span style="color:blue;">**X**</span> won (represented by `[[6,7,1,4],[5,9,2]]`), the winning move on space <span style="color:blue;">`4`</span> is awarded a full 0.1 points, the second-to-last move is awarded 0.05 points, all the way down to 0.0125 points for the first move (<span style="color:blue;">`6`</span>).  
+Importantly, not all moves are rewarded equally. Moves later in the game (e.g. the winning move) receive the greatest reward. For the following board where <span style="color:blue;">**X**</span> won (represented by `[[6,7,1,4],[5,9,2]]`), the winning move on space <span style="color:blue;">`4`</span> is awarded a full 0.1 points, the second-to-last move is awarded 0.05 points, all the way down to 0.0125 points for the first move (<span style="color:blue;">`6`</span>).  
 ![tictactoe13](/assets/images/rl_tictactoe/tictactoe13.svg){:height="60%" width="60%"}   
-- Technical note: The policy entry does not contain probabilities. The policy entry holds the sum of all the rewards from `update_policy()`. It's possible for a policy entry to contain negative values (e.g. if the reinforcement learner loses a lot). But probabilities cannot be negative, so these values cannot be used directly for move selection! 🤔   
+- Another technical note is that the probabilities for move selection are calculated by applying the `softmax()` function to the values in `self.policy`. As mentioned above, the policy entry is simply the sum of all the rewards from `update_policy()`. This means that it's possible for a policy entry to hold negative values if the reinforcement learner loses a lot:   
 ```
 {'6759': {1: 4.17,
           2: -5.37,
@@ -190,7 +188,7 @@ Here we see the dictionary entry for `'6759'` contains another dictionary in whi
           4: -3.95,
           8: -5.52}}
 ```
-In order to translate these policy entries (summed rewards) into appropriate probabilities for choosing moves, the code uses the `softmax()` function, which is commonly used in RL for this purpose. Here you can see how the policy values turn into appropriate probabilities after applying the softmax function:
+However, probabilities cannot be negative, so these values cannot be used directly for move selection. In order to translate these policy entries (aka summed rewards) into appropriate probabilities for choosing moves, the code uses the `softmax()` function, which is commonly used in machine learning for this purpose. Here you can see how the policy values turn into appropriate probabilities after applying the softmax function:
 
 | Move | Policy Value | Softmax |
 |---:|---:|---:|
@@ -203,7 +201,7 @@ In order to translate these policy entries (summed rewards) into appropriate pro
 **RL Terminology:** The [softmax function](https://en.wikipedia.org/wiki/Softmax_function#Reinforcement_learning) can be used to convert values into action probabilities.
 {: .notice--info}
 
-Putting it all together, the `ReinforcementLearner` class with its immediate dependencies looks like this ([link to code](https://htmlpreview.github.io/?https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/ca09fb05c6628e78f53235487dfe3b9cb6452cfd/tic_tac_toe_reinforcement_learner.html#reinforcement_learner)):  
+Putting it all together, the `ReinforcementLearner` class with its immediate dependencies looks like this ([link to code](https://htmlpreview.github.io/?https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/702565a725da516775de816ce88e35fa11ae3c5a/tic_tac_toe_reinforcement_learner.html#reinforcement_learner)):  
 
 {% highlight python linenos %}
 class ReinforcementLearner(Player):
@@ -303,14 +301,14 @@ def softmax(weights):
 
 ## The Opponent
 
-In addition to the reinforcement learner, we provide three opponent player classes ([link to code](https://htmlpreview.github.io/?https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/ca09fb05c6628e78f53235487dfe3b9cb6452cfd/tic_tac_toe_reinforcement_learner.html#reinforcement_learner)):  
+In addition to the reinforcement learner, we provide three opponent player classes ([link to code](https://htmlpreview.github.io/?https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/702565a725da516775de816ce88e35fa11ae3c5a/tic_tac_toe_reinforcement_learner.html#reinforcement_learner)):  
 1. `OptimalPlayer` will always choose an optimal move.
-2. `DumbPlayer` will always choose a random move.
+2. `RandomPlayer` will always choose a random move.
 3. `MischeviousPlayer` is mischevious! 😈
 
 ## Gameplay
 
-Finally, we have a couple functions that take care of game play ([link to code](https://htmlpreview.github.io/?https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/ca09fb05c6628e78f53235487dfe3b9cb6452cfd/tic_tac_toe_reinforcement_learner.html#gameplay_functions)): `play_game()` plays a single game, and `train_rl()` trains a reinforcement learner against an opponent for a specified number of games.
+Finally, we have a couple functions that take care of game play ([link to code](https://htmlpreview.github.io/?https://gist.githubusercontent.com/malisas/02f6875656cc2ab8d9e59e909372dc99/raw/702565a725da516775de816ce88e35fa11ae3c5a/tic_tac_toe_reinforcement_learner.html#gameplay_functions)): `play_game()` plays a single game, and `train_rl()` trains a reinforcement learner against an opponent for a specified number of games.
 
 We also have a `tournament()` function which we will use to test how well our reinforcement learner performs after being trained.
 
