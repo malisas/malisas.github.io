@@ -48,7 +48,7 @@ Here's a [direct link](https://htmlpreview.github.io/?https://gist.githubusercon
 
 ## Performance improves over time
 
-Let's have the reinforcement learner play 100,000 games against a player called `OptimalPlayer` which always plays optimal moves. Every 1,000 games, we'll calculate what proportion of the last 1,000 games the reinforcement learner won, and plot the performance over time. For exact details about   
+Let's have the reinforcement learner play 100,000 games against a player called `OptimalPlayer` which always plays optimal moves. Every 1,000 games, we'll calculate what proportion of the last 1,000 games the reinforcement learner won, and plot the performance over time. For technical details about how exactly the reinforcement learner "learns" from each game, please refer to the code section.    
 
 ![tictactoe1](/assets/images/rl_tictactoe/tictactoe1.svg)  
 
