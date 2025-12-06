@@ -17,7 +17,7 @@ If you are interested in learning about time series data analysis or unemploymen
 
 Follow along with the rendered R code [here](../assets/html/unemployment_data_analysis.html). The raw quarto document can be accessed [here](https://gist.github.com/malisas/30f8a5910370ee342cdf673c9fc5d038#file-unemployment_data_analysis-qmd).
 
-Disclaimer: I am a novice at time series analysis, and the approach presented here is rudimentary and possibly flawed. If you see something wrong please reach out.
+Disclaimer: I am a novice at time series analysis, and the approach presented here is rudimentary and possibly flawed. If you see something wrong, please reach out.
 
 Pre-requisites: Have some data analysis experience in R or Python.
 
@@ -58,7 +58,7 @@ We can make a couple observations even with this rudimentary analysis:
 
 ## A Note on the Number of Cycles
 
-The number of cycles (12 in this case) is tuned indirectly by the `lookahead` parameter (explained [here](https://erdogant.github.io/findpeaks/pages/html/Peakdetect.html#one-dimensional-data)), which is set to `20` in the code. The code for the method itself [here](https://github.com/erdogant/findpeaks/blob/01f7cab370c14cb4784ba759b4e5cefcf7f42ab7/findpeaks/peakdetect.py#L181-L224) is actually very simple: it will select a point as a peak if `lookahead` number of datapoints afer the point are lower than the peak. 
+The number of cycles (12 in this case) is tuned indirectly by the `lookahead` parameter (explained [here](https://erdogant.github.io/findpeaks/pages/html/Peakdetect.html#one-dimensional-data)), which is set to `20` in the code. The code for the method itself [here](https://github.com/erdogant/findpeaks/blob/01f7cab370c14cb4784ba759b4e5cefcf7f42ab7/findpeaks/peakdetect.py#L181-L224) is actually very simple: it will select a point as a peak if `lookahead` number of datapoints after the point are lower than the peak. This simple approach worked better for my purposes than other common peak finding methods like `pracma::findpeaks()`.
 
 Note that you can obtain more cycles by lowering the parameter (e.g. `lookahead=10`):
 
@@ -89,7 +89,7 @@ For this analysis, I wanted to forecast medium-term trends in unemployment over 
 - **Select seasonally adjusted data.**  
 Because the objective is the structural trend rather than seasonal behavior, I used the **seasonally adjusted** unemployment rate as the starting dataset.
 - **Extract the historical trend using STL decomposition.**  
-I applied STL (Seasonal-Trend decomposition using Loess) to decompose the seasonally adjusted series into Trend, Seasonality, and Remainder components. This isolated the quantity of interest for medium-term forecasting: the **trend**.  
+I applied STL (Seasonal-Trend decomposition using Loess) to decompose the seasonally adjusted series into Trend, Seasonality, and Remainder components. The remainder is whatever is left after removing trend + seasonality. This isolated the quantity of interest for medium-term forecasting: the **trend**.  
 Here is what that decomposition looks like:  
 ![unemployment5](/assets/images/bls_unemployment/unemployment5.svg){:height="60%" width="60%"}   
 As you can see, the second row contains the Trend component of the decomposition. For the rest of the analysis, I will consider this Trend component as the historical "ground truth" to be used for model evaluation. The model forecasts this component only, and the seasonal and remainder components are intentionally ignored.  
