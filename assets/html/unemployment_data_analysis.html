@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Unemployment Data Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="unemployment_data_analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="unemployment_data_analysis_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="unemployment_data_analysis_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="unemployment_data_analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="unemployment_data_analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="unemployment_data_analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="unemployment_data_analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="unemployment_data_analysis_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="unemployment_data_analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="unemployment_data_analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="unemployment_data_analysis_files/libs/bootstrap/bootstrap-9173102355174a8566f51753d113d3bb.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="unemployment_data_analysis_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="unemployment_data_analysis_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="unemployment_data_analysis_files/libs/plotly-binding-4.11.0/plotly.js"></script>
+<script src="unemployment_data_analysis_files/libs/typedarray-0.1/typedarray.min.js"></script>
+<script src="unemployment_data_analysis_files/libs/jquery-3.5.1/jquery.min.js"></script>
+<link href="unemployment_data_analysis_files/libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
+<script src="unemployment_data_analysis_files/libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+<link href="unemployment_data_analysis_files/libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="unemployment_data_analysis_files/libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#load-libraries-and-data" id="toc-load-libraries-and-data" class="nav-link active" data-scroll-target="#load-libraries-and-data">Load Libraries and Data</a></li>
+  <li><a href="#historical-unemployment-cycles" id="toc-historical-unemployment-cycles" class="nav-link" data-scroll-target="#historical-unemployment-cycles">Historical Unemployment Cycles</a></li>
+  <li><a href="#seasonal-data" id="toc-seasonal-data" class="nav-link" data-scroll-target="#seasonal-data">Seasonal Data</a></li>
+  <li><a href="#forecasting-future-unemployment-trends" id="toc-forecasting-future-unemployment-trends" class="nav-link" data-scroll-target="#forecasting-future-unemployment-trends">Forecasting Future Unemployment Trends</a>
+  <ul class="collapse">
+  <li><a href="#stl-decomposition" id="toc-stl-decomposition" class="nav-link" data-scroll-target="#stl-decomposition">STL Decomposition</a></li>
+  <li><a href="#rolling-origin-cross-validation-test" id="toc-rolling-origin-cross-validation-test" class="nav-link" data-scroll-target="#rolling-origin-cross-validation-test">Rolling-Origin Cross-Validation Test</a>
+  <ul class="collapse">
+  <li><a href="#illustrate-rolling-trend-prediction" id="toc-illustrate-rolling-trend-prediction" class="nav-link" data-scroll-target="#illustrate-rolling-trend-prediction">Illustrate Rolling Trend Prediction</a></li>
+  </ul></li>
+  <li><a href="#stl-arima-trend-forecast" id="toc-stl-arima-trend-forecast" class="nav-link" data-scroll-target="#stl-arima-trend-forecast">STL + ARIMA Trend Forecast</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Unemployment Data Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="load-libraries-and-data" class="level1">
+<h1>Load Libraries and Data</h1>
+<p>Assumes the <code>FRED_API_KEY</code> environment variable has been set. Obtain one here: <a href="https://fred.stlouisfed.org/docs/api/api_key.html">link</a></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fredr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forecast)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(progress)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(RColorBrewer)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotly)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Load seasonally-adjusted data</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>df_sa <span class="ot">&lt;-</span> <span class="fu">fredr</span>(</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">series_id =</span> <span class="st">"UNRATE"</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_start =</span> <span class="fu">as.Date</span>(<span class="st">"1948-01-01"</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>realtime_start, <span class="sc">-</span>realtime_end)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Load not-seasonally-adjusted data</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>df_nsa <span class="ot">&lt;-</span> <span class="fu">fredr</span>(</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">series_id =</span> <span class="st">"UNRATENSA"</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_start =</span> <span class="fu">as.Date</span>(<span class="st">"1948-01-01"</span>)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>realtime_start, <span class="sc">-</span>realtime_end)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>ts_sa <span class="ot">=</span> <span class="fu">ts</span>(<span class="at">data =</span> df_sa<span class="sc">$</span>value, <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">1948</span>, <span class="dv">1</span>), <span class="at">frequency =</span> <span class="dv">12</span>)</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>ts_nsa <span class="ot">=</span> <span class="fu">ts</span>(<span class="at">data =</span> df_nsa<span class="sc">$</span>value, <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">1948</span>, <span class="dv">1</span>), <span class="at">frequency =</span> <span class="dv">12</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="historical-unemployment-cycles" class="level1">
+<h1>Historical Unemployment Cycles</h1>
+<p>Plot the historical data</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_sa, <span class="fu">aes</span>(<span class="at">x =</span> date, <span class="at">y =</span> value)) <span class="sc">+</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="fu">sprintf</span>(</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">"U.S. Unemployment Rate</span><span class="sc">\n</span><span class="st">%s - %s (Seasonally Adjusted)"</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">format</span>(<span class="fu">head</span>(df_sa<span class="sc">$</span>date, <span class="at">n =</span> <span class="dv">1</span>), <span class="st">"%b %Y"</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">format</span>(<span class="fu">tail</span>(df_sa<span class="sc">$</span>date, <span class="at">n =</span> <span class="dv">1</span>), <span class="st">"%b %Y"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Unemployment"</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_date</span>(<span class="at">date_breaks =</span> <span class="st">"10 years"</span>, <span class="at">date_labels =</span> <span class="st">"%Y"</span>) <span class="sc">+</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>(<span class="at">base_size =</span> <span class="dv">20</span>) <span class="sc">+</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">color =</span> <span class="st">"black"</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="unemployment_data_analysis_files/figure-html/unnamed-chunk-2-1.svg" class="img-fluid figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Then identify the unemployment cycles and color by cycle.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># import some Python packages for peak finding</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(reticulate)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">use_condaenv</span>(<span class="st">"base"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>np <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"numpy"</span>, <span class="at">convert =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>findpeaks <span class="ot">&lt;-</span> <span class="fu">import</span>(<span class="st">"findpeaks"</span>, <span class="at">convert =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>builtins <span class="ot">&lt;-</span> <span class="fu">import_builtins</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure lookahead is a Python int</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>fp <span class="ot">&lt;-</span> findpeaks<span class="sc">$</span><span class="fu">findpeaks</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"peakdetect"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">lookahead =</span> builtins<span class="sc">$</span><span class="fu">int</span>(<span class="dv">20</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Pass proper numpy arrays</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>np_sa <span class="ot">&lt;-</span> np<span class="sc">$</span><span class="fu">array</span>(<span class="fu">as.numeric</span>(ts_sa), <span class="at">dtype =</span> <span class="st">"float64"</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>df_fp <span class="ot">&lt;-</span> reticulate<span class="sc">::</span><span class="fu">py_to_r</span>(fp<span class="sc">$</span><span class="fu">fit</span>(</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  np_sa,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> np<span class="sc">$</span><span class="fu">arange</span>(<span class="dv">1</span>, <span class="fu">length</span>(ts_sa) <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>)[[<span class="st">'df'</span>]]) <span class="sc">|&gt;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">ID =</span> x, <span class="at">Cycle =</span> labx) <span class="sc">|&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Cycle =</span> <span class="fu">factor</span>(Cycle))</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>df_sa_fp <span class="ot">&lt;-</span> df_sa <span class="sc">|&gt;</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ID =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df_sa)) <span class="sc">|&gt;</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(df_fp, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"ID"</span>, <span class="st">"value"</span> <span class="ot">=</span> <span class="st">"y"</span>))</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>my_colors <span class="ot">&lt;-</span> <span class="fu">brewer.pal</span>(<span class="at">n =</span> <span class="fu">length</span>(<span class="fu">levels</span>(df_sa_fp<span class="sc">$</span>Cycle)), <span class="at">name =</span> <span class="st">"Set3"</span>)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_sa_fp, <span class="fu">aes</span>(<span class="at">x =</span> date, <span class="at">y =</span> value, <span class="at">color =</span> Cycle)) <span class="sc">+</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="fu">sprintf</span>(</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>      <span class="st">"U.S. Unemployment Rate</span><span class="sc">\n</span><span class="st">%s - %s (Seasonally Adjusted)"</span>,</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>      <span class="fu">format</span>(<span class="fu">head</span>(df_sa<span class="sc">$</span>date, <span class="at">n =</span> <span class="dv">1</span>), <span class="st">"%b %Y"</span>),</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>      <span class="fu">format</span>(<span class="fu">tail</span>(df_sa<span class="sc">$</span>date, <span class="at">n =</span> <span class="dv">1</span>), <span class="st">"%b %Y"</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Unemployment"</span>,</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Findpeaks</span><span class="sc">\n</span><span class="st">Cycle"</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_date</span>(<span class="at">date_breaks =</span> <span class="st">"10 years"</span>, <span class="at">date_labels =</span> <span class="st">"%Y"</span>) <span class="sc">+</span></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>(<span class="at">base_size =</span> <span class="dv">20</span>) <span class="sc">+</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">color =</span> <span class="st">"black"</span>)</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> my_colors)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="unemployment_data_analysis_files/figure-html/unnamed-chunk-4-1.svg" class="img-fluid figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Summarize the cycles</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df_cycle_durations <span class="ot">&lt;-</span> df_sa_fp <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Cycle, ID, date, valley, peak) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Cycle) <span class="sc">|&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Event =</span> <span class="fu">case_when</span>(</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>      date <span class="sc">==</span> <span class="fu">min</span>(date) <span class="sc">~</span> <span class="st">"Start"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>      date <span class="sc">==</span> <span class="fu">max</span>(date) <span class="sc">~</span> <span class="st">"End"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>      peak <span class="sc">~</span> <span class="st">"Peak"</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(Event)) <span class="sc">|&gt;</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">id_cols =</span> Cycle, <span class="at">names_from =</span> Event, <span class="at">values_from =</span> date) <span class="sc">|&gt;</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">DurationDays =</span> End <span class="sc">-</span> Start,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">DurationYears =</span> <span class="fu">time_length</span>(DurationDays, <span class="at">unit =</span> <span class="st">"years"</span>),</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">DaysToPeak =</span> Peak <span class="sc">-</span> Start,</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">YearsToPeak =</span> <span class="fu">time_length</span>(DaysToPeak, <span class="at">unit =</span> <span class="st">"years"</span>)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(df_cycle_durations, <span class="at">caption =</span> <span class="st">"Table: Unemployment Cycle Duration"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Table: Unemployment Cycle Duration</caption>
+<colgroup>
+<col style="width: 6%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 14%">
+<col style="width: 15%">
+<col style="width: 12%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Cycle</th>
+<th style="text-align: left;">Start</th>
+<th style="text-align: left;">Peak</th>
+<th style="text-align: left;">End</th>
+<th style="text-align: left;">DurationDays</th>
+<th style="text-align: right;">DurationYears</th>
+<th style="text-align: left;">DaysToPeak</th>
+<th style="text-align: right;">YearsToPeak</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">1948-01-01</td>
+<td style="text-align: left;">1949-10-01</td>
+<td style="text-align: left;">1953-04-01</td>
+<td style="text-align: left;">1917 days</td>
+<td style="text-align: right;">5.248460</td>
+<td style="text-align: left;">639 days</td>
+<td style="text-align: right;">1.7494867</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">1953-05-01</td>
+<td style="text-align: left;">1954-09-01</td>
+<td style="text-align: left;">1957-02-01</td>
+<td style="text-align: left;">1372 days</td>
+<td style="text-align: right;">3.756331</td>
+<td style="text-align: left;">488 days</td>
+<td style="text-align: right;">1.3360712</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: left;">1957-03-01</td>
+<td style="text-align: left;">1958-07-01</td>
+<td style="text-align: left;">1960-01-01</td>
+<td style="text-align: left;">1036 days</td>
+<td style="text-align: right;">2.836413</td>
+<td style="text-align: left;">487 days</td>
+<td style="text-align: right;">1.3333333</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: left;">1960-02-01</td>
+<td style="text-align: left;">1961-05-01</td>
+<td style="text-align: left;">1968-08-01</td>
+<td style="text-align: left;">3104 days</td>
+<td style="text-align: right;">8.498289</td>
+<td style="text-align: left;">455 days</td>
+<td style="text-align: right;">1.2457221</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5</td>
+<td style="text-align: left;">1968-09-01</td>
+<td style="text-align: left;">1970-12-01</td>
+<td style="text-align: left;">1973-09-01</td>
+<td style="text-align: left;">1826 days</td>
+<td style="text-align: right;">4.999315</td>
+<td style="text-align: left;">821 days</td>
+<td style="text-align: right;">2.2477755</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">6</td>
+<td style="text-align: left;">1973-10-01</td>
+<td style="text-align: left;">1975-05-01</td>
+<td style="text-align: left;">1979-04-01</td>
+<td style="text-align: left;">2008 days</td>
+<td style="text-align: right;">5.497604</td>
+<td style="text-align: left;">577 days</td>
+<td style="text-align: right;">1.5797399</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">7</td>
+<td style="text-align: left;">1979-05-01</td>
+<td style="text-align: left;">1982-11-01</td>
+<td style="text-align: left;">1989-02-01</td>
+<td style="text-align: left;">3564 days</td>
+<td style="text-align: right;">9.757700</td>
+<td style="text-align: left;">1280 days</td>
+<td style="text-align: right;">3.5044490</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8</td>
+<td style="text-align: left;">1989-03-01</td>
+<td style="text-align: left;">1992-06-01</td>
+<td style="text-align: left;">2000-03-01</td>
+<td style="text-align: left;">4018 days</td>
+<td style="text-align: right;">11.000685</td>
+<td style="text-align: left;">1188 days</td>
+<td style="text-align: right;">3.2525667</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">2000-04-01</td>
+<td style="text-align: left;">2003-06-01</td>
+<td style="text-align: left;">2006-09-01</td>
+<td style="text-align: left;">2344 days</td>
+<td style="text-align: right;">6.417522</td>
+<td style="text-align: left;">1156 days</td>
+<td style="text-align: right;">3.1649555</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">10</td>
+<td style="text-align: left;">2006-10-01</td>
+<td style="text-align: left;">2009-10-01</td>
+<td style="text-align: left;">2019-08-01</td>
+<td style="text-align: left;">4687 days</td>
+<td style="text-align: right;">12.832307</td>
+<td style="text-align: left;">1096 days</td>
+<td style="text-align: right;">3.0006845</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">11</td>
+<td style="text-align: left;">2019-09-01</td>
+<td style="text-align: left;">2020-04-01</td>
+<td style="text-align: left;">2023-03-01</td>
+<td style="text-align: left;">1277 days</td>
+<td style="text-align: right;">3.496236</td>
+<td style="text-align: left;">213 days</td>
+<td style="text-align: right;">0.5831622</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">12</td>
+<td style="text-align: left;">2023-04-01</td>
+<td style="text-align: left;">NA</td>
+<td style="text-align: left;">2025-09-01</td>
+<td style="text-align: left;">884 days</td>
+<td style="text-align: right;">2.420260</td>
+<td style="text-align: left;">NA days</td>
+<td style="text-align: right;">NA</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df_cycle_durations <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># exclude the current/final cycle</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Cycle <span class="sc">!=</span> <span class="st">"12"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">Mean_Cycle_Duration_Years =</span> <span class="fu">mean</span>(DurationYears),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Median_Cycle_Duration_Years =</span> <span class="fu">median</span>(DurationYears),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Mean_Years_to_Peak =</span> <span class="fu">mean</span>(YearsToPeak),</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Median_Years_to_Peak =</span> <span class="fu">median</span>(YearsToPeak)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 27%">
+<col style="width: 29%">
+<col style="width: 20%">
+<col style="width: 22%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">Mean_Cycle_Duration_Years</th>
+<th style="text-align: right;">Median_Cycle_Duration_Years</th>
+<th style="text-align: right;">Mean_Years_to_Peak</th>
+<th style="text-align: right;">Median_Years_to_Peak</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">6.75826</td>
+<td style="text-align: right;">5.497604</td>
+<td style="text-align: right;">2.090722</td>
+<td style="text-align: right;">1.749487</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Experiment with lookahead parameter</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure lookahead is a Python int</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fp2 <span class="ot">&lt;-</span> findpeaks<span class="sc">$</span><span class="fu">findpeaks</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"peakdetect"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">lookahead =</span> builtins<span class="sc">$</span><span class="fu">int</span>(<span class="dv">10</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>df_fp2 <span class="ot">&lt;-</span> reticulate<span class="sc">::</span><span class="fu">py_to_r</span>(fp2<span class="sc">$</span><span class="fu">fit</span>(</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  np_sa,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> np<span class="sc">$</span><span class="fu">arange</span>(<span class="dv">1</span>, <span class="fu">length</span>(ts_sa) <span class="sc">+</span> <span class="dv">1</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)[[<span class="st">'df'</span>]]) <span class="sc">|&gt;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">ID =</span> x, <span class="at">Cycle =</span> labx) <span class="sc">|&gt;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Cycle =</span> <span class="fu">factor</span>(Cycle))</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>df_sa_fp2 <span class="ot">&lt;-</span> df_sa <span class="sc">|&gt;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ID =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df_sa)) <span class="sc">|&gt;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(df_fp2, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"ID"</span>, <span class="st">"value"</span> <span class="ot">=</span> <span class="st">"y"</span>))</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>pal_func <span class="ot">&lt;-</span> <span class="fu">colorRampPalette</span>(<span class="fu">brewer.pal</span>(<span class="dv">8</span>, <span class="st">"Set3"</span>))</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>my_colors2 <span class="ot">&lt;-</span> <span class="fu">pal_func</span>(<span class="dv">16</span>)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_sa_fp2, <span class="fu">aes</span>(<span class="at">x =</span> date, <span class="at">y =</span> value, <span class="at">color =</span> Cycle)) <span class="sc">+</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"U.S. Unemployment Rate</span><span class="sc">\n</span><span class="st">Jan 1948 - Sep 2025 (Seasonally Adjusted)"</span>,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Unemployment"</span>,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Findpeaks</span><span class="sc">\n</span><span class="st">Cycle</span><span class="sc">\n</span><span class="st">(lookahead=10)"</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_date</span>(<span class="at">date_breaks =</span> <span class="st">"10 years"</span>, <span class="at">date_labels =</span> <span class="st">"%Y"</span>) <span class="sc">+</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>(<span class="at">base_size =</span> <span class="dv">20</span>) <span class="sc">+</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">color =</span> <span class="st">"black"</span>)</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> my_colors2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="unemployment_data_analysis_files/figure-html/unnamed-chunk-6-1.svg" class="img-fluid figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="seasonal-data" class="level1">
+<h1>Seasonal Data</h1>
+<p>Plot the seasonally adjusted data alongside the not-seasonally adjusted data</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Wide monthly data for comparison</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>df_sa_nsa_wide <span class="ot">&lt;-</span> <span class="fu">rbind</span>(df_sa, df_nsa) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">DataType =</span> <span class="fu">case_when</span>(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>      series_id <span class="sc">==</span> <span class="st">"UNRATE"</span> <span class="sc">~</span> <span class="st">"Seasonally Adjusted"</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>      series_id <span class="sc">==</span> <span class="st">"UNRATENSA"</span> <span class="sc">~</span> <span class="st">"Not Seasonally Adjusted"</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(date, value, DataType) <span class="sc">|&gt;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> DataType, <span class="at">values_from =</span> value) <span class="sc">|&gt;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date <span class="sc">&gt;</span> <span class="st">"2022-12-01"</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Dense (daily) grid + linear interpolation for SA &amp; NSA</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>dense_dates <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">date =</span> <span class="fu">seq</span>(<span class="fu">min</span>(df_sa_nsa_wide<span class="sc">$</span>date), <span class="fu">max</span>(df_sa_nsa_wide<span class="sc">$</span>date), <span class="at">by =</span> <span class="st">"1 day"</span>)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>dense_shade <span class="ot">&lt;-</span> dense_dates <span class="sc">|&gt;</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">SA =</span> <span class="fu">approx</span>(</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>      df_sa_nsa_wide<span class="sc">$</span>date,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>      df_sa_nsa_wide<span class="sc">$</span><span class="st">`</span><span class="at">Seasonally Adjusted</span><span class="st">`</span>,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">xout =</span> date</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    )<span class="sc">$</span>y,</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">NSA =</span> <span class="fu">approx</span>(</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>      df_sa_nsa_wide<span class="sc">$</span>date,</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>      df_sa_nsa_wide<span class="sc">$</span><span class="st">`</span><span class="at">Not Seasonally Adjusted</span><span class="st">`</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">xout =</span> date</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    )<span class="sc">$</span>y</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">ymin =</span> <span class="fu">if_else</span>(SA <span class="sc">&gt;</span> NSA, NSA, <span class="cn">NA_real_</span>),</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">ymax =</span> <span class="fu">if_else</span>(SA <span class="sc">&gt;</span> NSA, SA, <span class="cn">NA_real_</span>)</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a><span class="co"># January vertical lines (monthly positions)</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>jan_lines <span class="ot">&lt;-</span> df_sa_nsa_wide <span class="sc">|&gt;</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">format</span>(date, <span class="st">"%m"</span>) <span class="sc">==</span> <span class="st">"01"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(date)</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Original long-format data for lines</span></span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>df_sa_nsa_long <span class="ot">&lt;-</span> <span class="fu">rbind</span>(df_sa, df_nsa) <span class="sc">|&gt;</span></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">DataType =</span> <span class="fu">case_when</span>(</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>      series_id <span class="sc">==</span> <span class="st">"UNRATE"</span> <span class="sc">~</span> <span class="st">"Seasonally Adjusted"</span>,</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>      series_id <span class="sc">==</span> <span class="st">"UNRATENSA"</span> <span class="sc">~</span> <span class="st">"Not Seasonally Adjusted"</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date <span class="sc">&gt;</span> <span class="st">"2022-12-01"</span>)</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract values for Dec 2024 from df_sa_nsa_wide</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>dec_pt <span class="ot">&lt;-</span> df_sa_nsa_wide <span class="sc">|&gt;</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">format</span>(date, <span class="st">"%Y-%m"</span>) <span class="sc">==</span> <span class="st">"2024-12"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>)</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>dec_date <span class="ot">&lt;-</span> dec_pt<span class="sc">$</span>date</span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>dec_SA <span class="ot">&lt;-</span> dec_pt<span class="sc">$</span><span class="st">`</span><span class="at">Seasonally Adjusted</span><span class="st">`</span></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>dec_NSA <span class="ot">&lt;-</span> dec_pt<span class="sc">$</span><span class="st">`</span><span class="at">Not Seasonally Adjusted</span><span class="st">`</span></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a><span class="co"># Build annotation string automatically</span></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>dec_label <span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="st">"Dec 2024</span><span class="sc">\n</span><span class="st">NSA = %.1f, SA = %.1f"</span>, dec_NSA, dec_SA)</span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot</span></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Shading between curves where SA &gt; NSA (using dense interpolation)</span></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(</span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> dense_shade,</span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> date, <span class="at">ymin =</span> ymin, <span class="at">ymax =</span> ymax),</span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"gray80"</span>,</span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.6</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>  <span class="co"># January thick vertical lines</span></span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(</span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> jan_lines,</span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="fu">as.numeric</span>(date)),</span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">1.1</span>,</span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.7</span></span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Original monthly lines</span></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> df_sa_nsa_long,</span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> date, <span class="at">y =</span> value, <span class="at">color =</span> DataType),</span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">0.7</span></span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"U.S. Unemployment Rate</span><span class="sc">\n</span><span class="st">Jan 2023 - Sep 2025"</span>,</span>
+<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Shaded areas indicate when seasonal unemployment is relatively low</span><span class="sc">\n</span><span class="st">(seasonal employment is high)"</span>,</span>
+<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Unemployment"</span>,</span>
+<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Data Type"</span></span>
+<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_date</span>(<span class="at">date_breaks =</span> <span class="st">"2 months"</span>, <span class="at">date_labels =</span> <span class="st">"%b</span><span class="sc">\n</span><span class="st">%Y"</span>) <span class="sc">+</span></span>
+<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(</span>
+<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(</span>
+<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Seasonally Adjusted"</span> <span class="ot">=</span> <span class="st">"#af8dc3"</span>,</span>
+<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Not Seasonally Adjusted"</span> <span class="ot">=</span> <span class="st">"#7fbf7b"</span></span>
+<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Arrow pointing to the data at Dec 2024</span></span>
+<span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(</span>
+<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(</span>
+<span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> dec_date <span class="sc">+</span> <span class="dv">20</span>,</span>
+<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> (dec_SA <span class="sc">+</span> dec_NSA) <span class="sc">/</span> <span class="dv">2</span>,</span>
+<span id="cb8-104"><a href="#cb8-104" aria-hidden="true" tabindex="-1"></a>      <span class="at">xend =</span> dec_date,</span>
+<span id="cb8-105"><a href="#cb8-105" aria-hidden="true" tabindex="-1"></a>      <span class="at">yend =</span> dec_SA</span>
+<span id="cb8-106"><a href="#cb8-106" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a>    <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.25</span>, <span class="st">"cm"</span>)),</span>
+<span id="cb8-108"><a href="#cb8-108" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">0.6</span></span>
+<span id="cb8-109"><a href="#cb8-109" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Text label box showing NSA/SA values</span></span>
+<span id="cb8-111"><a href="#cb8-111" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_label</span>(</span>
+<span id="cb8-112"><a href="#cb8-112" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> dec_date <span class="sc">+</span> <span class="dv">20</span>, <span class="at">y =</span> (dec_SA <span class="sc">+</span> dec_NSA) <span class="sc">/</span> <span class="dv">2</span>, <span class="at">label =</span> dec_label),</span>
+<span id="cb8-113"><a href="#cb8-113" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="dv">4</span>,</span>
+<span id="cb8-114"><a href="#cb8-114" aria-hidden="true" tabindex="-1"></a>    <span class="at">label.size =</span> <span class="fl">0.3</span>,</span>
+<span id="cb8-115"><a href="#cb8-115" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"white"</span></span>
+<span id="cb8-116"><a href="#cb8-116" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb8-117"><a href="#cb8-117" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>(<span class="at">base_size =</span> <span class="dv">20</span>) <span class="sc">+</span></span>
+<span id="cb8-118"><a href="#cb8-118" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb8-119"><a href="#cb8-119" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb8-120"><a href="#cb8-120" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb8-121"><a href="#cb8-121" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">color =</span> <span class="st">"black"</span>),</span>
+<span id="cb8-122"><a href="#cb8-122" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"inside"</span>,</span>
+<span id="cb8-123"><a href="#cb8-123" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position.inside =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb8-124"><a href="#cb8-124" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.justification =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb8-125"><a href="#cb8-125" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.background =</span> <span class="fu">element_rect</span>(</span>
+<span id="cb8-126"><a href="#cb8-126" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> <span class="st">"white"</span>,</span>
+<span id="cb8-127"><a href="#cb8-127" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb8-128"><a href="#cb8-128" aria-hidden="true" tabindex="-1"></a>      <span class="at">linewidth =</span> <span class="fl">0.6</span></span>
+<span id="cb8-129"><a href="#cb8-129" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb8-130"><a href="#cb8-130" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.box.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="cn">NA</span>),</span>
+<span id="cb8-131"><a href="#cb8-131" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">17</span>)</span>
+<span id="cb8-132"><a href="#cb8-132" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="unemployment_data_analysis_files/figure-html/unnamed-chunk-7-1.svg" class="img-fluid figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Seasonal employment consistently occurs Sep - Dec, and Apr - May.</p>
+</section>
+<section id="forecasting-future-unemployment-trends" class="level1">
+<h1>Forecasting Future Unemployment Trends</h1>
+<section id="stl-decomposition" class="level2">
+<h2 class="anchored" data-anchor-id="stl-decomposition">STL Decomposition</h2>
+<p>Perform an STL decomposition on the seasonally adjusted data and plot the components.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>stl_full <span class="ot">&lt;-</span> <span class="fu">stl</span>(ts_sa, <span class="at">s.window =</span> <span class="st">"periodic"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>df_stl <span class="ot">&lt;-</span> <span class="fu">cbind</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  df_sa <span class="sc">|&gt;</span> <span class="fu">select</span>(date, value) <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">orig_data =</span> value),</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>(stl_full<span class="sc">$</span>time.series)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>df_stl_long <span class="ot">&lt;-</span> df_stl <span class="sc">|&gt;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(date, orig_data, trend, seasonal, remainder) <span class="sc">|&gt;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="sc">-</span>date,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"component"</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"value"</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">component =</span> <span class="fu">factor</span>(</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>      component,</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"orig_data"</span>, <span class="st">"trend"</span>, <span class="st">"seasonal"</span>, <span class="st">"remainder"</span>)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">component =</span> <span class="fu">recode</span>(</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>      component,</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">orig_data =</span> <span class="st">"Original Data"</span>,</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">trend =</span> <span class="st">"Trend"</span>,</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">seasonal =</span> <span class="st">"Seasonal"</span>,</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">remainder =</span> <span class="st">"Remainder"</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Nice facet plot, no rectangles</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_stl_long, <span class="fu">aes</span>(<span class="at">x =</span> date, <span class="at">y =</span> value)) <span class="sc">+</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(component <span class="sc">~</span> ., <span class="at">scales =</span> <span class="st">"free_y"</span>, <span class="at">switch =</span> <span class="st">"y"</span>) <span class="sc">+</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Date"</span>,</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="cn">NULL</span>,</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"STL Decomposition of</span><span class="sc">\n</span><span class="st">Seasonally Adjusted Unemployment Data"</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">20</span>) <span class="sc">+</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">strip.placement =</span> <span class="st">"outside"</span>,</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">strip.background =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>)</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="unemployment_data_analysis_files/figure-html/unnamed-chunk-8-1.svg" class="img-fluid figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the "true trend"</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>trend_true <span class="ot">&lt;-</span> stl_full<span class="sc">$</span>time.series[, <span class="st">"trend"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="rolling-origin-cross-validation-test" class="level2">
+<h2 class="anchored" data-anchor-id="rolling-origin-cross-validation-test">Rolling-Origin Cross-Validation Test</h2>
+<p>Define the candidate trend-forecasting models</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ARIMA directly on trend</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>fc_arima_trend <span class="ot">&lt;-</span> <span class="cf">function</span>(y, h) {</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(<span class="fu">auto.arima</span>(y), <span class="at">error =</span> <span class="cf">function</span>(e) <span class="cn">NULL</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(fit)) {</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">rep</span>(<span class="cn">NA</span>, h))</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.numeric</span>(<span class="fu">forecast</span>(fit, <span class="at">h =</span> h)<span class="sc">$</span>mean)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># ETS on trend</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>fc_ets_trend <span class="ot">&lt;-</span> <span class="cf">function</span>(y, h) {</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(<span class="fu">ets</span>(y), <span class="at">error =</span> <span class="cf">function</span>(e) <span class="cn">NULL</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(fit)) {</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">rep</span>(<span class="cn">NA</span>, h))</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.numeric</span>(<span class="fu">forecast</span>(fit, <span class="at">h =</span> h)<span class="sc">$</span>mean)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Local linear trend model (StructTS)</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>fc_struct_trend <span class="ot">&lt;-</span> <span class="cf">function</span>(y, h) {</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(<span class="fu">StructTS</span>(y, <span class="at">type =</span> <span class="st">"trend"</span>), <span class="at">error =</span> <span class="cf">function</span>(e) <span class="cn">NULL</span>)</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.null</span>(fit)) {</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">rep</span>(<span class="cn">NA</span>, h))</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.numeric</span>(<span class="fu">forecast</span>(fit, <span class="at">h =</span> h)<span class="sc">$</span>mean)</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Define a function to perform the rolling-origin cross-validation for a model and return a vector of errors</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>manual_cv_trend <span class="ot">&lt;-</span> <span class="cf">function</span>(trend_ts, fc_fun, <span class="at">h =</span> <span class="dv">12</span>, <span class="at">initial =</span> <span class="dv">60</span>) {</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(trend_ts)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  errors <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA_real_</span>, n)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  t_index <span class="ot">&lt;-</span> <span class="fu">time</span>(trend_ts)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  folds <span class="ot">&lt;-</span> <span class="fu">seq</span>(initial, n <span class="sc">-</span> h)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  pb <span class="ot">&lt;-</span> progress_bar<span class="sc">$</span><span class="fu">new</span>(</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">format =</span> <span class="st">"  Trend CV [:bar] :percent ETA: :eta"</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">total =</span> <span class="fu">length</span>(folds),</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">clear =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">width =</span> <span class="dv">60</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> folds) {</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    pb<span class="sc">$</span><span class="fu">tick</span>()</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Training data</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    y_train <span class="ot">&lt;-</span> <span class="fu">window</span>(trend_ts, <span class="at">end =</span> t_index[i])</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Forecast h steps ahead</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    fc <span class="ot">&lt;-</span> <span class="fu">fc_fun</span>(y_train, h)</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">all</span>(<span class="fu">is.na</span>(fc))) {</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>      <span class="cf">next</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># True trend at horizon</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    ft <span class="ot">&lt;-</span> t_index[i <span class="sc">+</span> h]</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    actual <span class="ot">&lt;-</span> <span class="fu">window</span>(trend_ts, <span class="at">start =</span> ft, <span class="at">end =</span> ft)</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(actual) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>      <span class="cf">next</span></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Error</span></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>    errors[i <span class="sc">+</span> h] <span class="ot">&lt;-</span> actual <span class="sc">-</span> fc[h]</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>  errors</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Run the cross-validation and compute RMSE</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>h <span class="ot">&lt;-</span> <span class="dv">12</span> <span class="co"># 12-month ahead trend forecast</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>initial <span class="ot">&lt;-</span> <span class="dv">60</span> <span class="co"># give the initial training window enough data to perform ok</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>trend_models <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ARIMA_Trend =</span> fc_arima_trend,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ETS_Trend =</span> fc_ets_trend,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">LLT_Trend =</span> fc_struct_trend</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Running the test took about an hour on my computer,</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co"># so provide an option to save/load from disk if already run</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>load_errors_from_disk <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>trend_errors_filename <span class="ot">&lt;-</span> <span class="st">"trend_errors.rds"</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (load_errors_from_disk <span class="sc">&amp;</span> <span class="fu">file.exists</span>(trend_errors_filename)) {</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  trend_errors <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(trend_errors_filename)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">Sys.time</span>())</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  trend_errors <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (name <span class="cf">in</span> <span class="fu">names</span>(trend_models)) {</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Running trend model:"</span>, name, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    trend_errors[[name]] <span class="ot">&lt;-</span> <span class="fu">manual_cv_trend</span>(</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>      trend_true,</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>      trend_models[[name]],</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>      h,</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>      initial</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(trend_errors, trend_errors_filename)</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">Sys.time</span>())</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>rmse <span class="ot">&lt;-</span> <span class="cf">function</span>(e) {</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> e[<span class="sc">!</span><span class="fu">is.na</span>(e)]</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="cn">NA</span>)</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sqrt</span>(<span class="fu">mean</span>(x<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>trend_rmse <span class="ot">&lt;-</span> <span class="fu">sapply</span>(trend_errors, rmse)</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>trend_rmse</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>ARIMA_Trend   ETS_Trend   LLT_Trend 
+  0.9183801   1.1766657   1.2320801 </code></pre>
+</div>
+</div>
+<section id="illustrate-rolling-trend-prediction" class="level3">
+<h3 class="anchored" data-anchor-id="illustrate-rolling-trend-prediction">Illustrate Rolling Trend Prediction</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>current_train_end_index <span class="ot">&lt;-</span> <span class="dv">120</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>t_index <span class="ot">&lt;-</span> <span class="fu">time</span>(trend_true)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Training data</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>y_train <span class="ot">&lt;-</span> <span class="fu">window</span>(trend_true, <span class="at">end =</span> t_index[current_train_end_index])</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Forecast h steps ahead</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>fc <span class="ot">&lt;-</span> <span class="fu">fc_arima_trend</span>(y_train, h)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co"># True trend at horizon</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>ft <span class="ot">&lt;-</span> t_index[current_train_end_index <span class="sc">+</span> h]</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>actual <span class="ot">&lt;-</span> <span class="fu">window</span>(trend_true, <span class="at">start =</span> ft, <span class="at">end =</span> ft)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>plot_end_index <span class="ot">&lt;-</span> current_train_end_index <span class="sc">+</span> h</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>ts_to_date <span class="ot">&lt;-</span> <span class="cf">function</span>(x, start_year, <span class="at">start_month =</span> <span class="dv">1</span>) {</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># x is numeric like 1948.000, 1948.0833, ...</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  year <span class="ot">&lt;-</span> <span class="fu">floor</span>(x)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  month <span class="ot">&lt;-</span> <span class="fu">round</span>((x <span class="sc">-</span> year) <span class="sc">*</span> <span class="dv">12</span>) <span class="sc">+</span> start_month</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  month[month <span class="sc">&gt;</span> <span class="dv">12</span>] <span class="ot">&lt;-</span> month[month <span class="sc">&gt;</span> <span class="dv">12</span>] <span class="sc">-</span> <span class="dv">12</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  year[month <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> (x <span class="sc">-</span> <span class="fu">floor</span>(x)) <span class="sc">&gt;</span> <span class="fl">0.9</span>] <span class="ot">&lt;-</span> year[</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    month <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> (x <span class="sc">-</span> <span class="fu">floor</span>(x)) <span class="sc">&gt;</span> <span class="fl">0.9</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>  ] <span class="sc">+</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.Date</span>(<span class="fu">sprintf</span>(<span class="st">"%d-%02d-01"</span>, year, month))</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>true_trend_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">time_ts =</span> t_index[<span class="dv">1</span><span class="sc">:</span>plot_end_index],</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">value =</span> <span class="fu">as.numeric</span>(<span class="fu">window</span>(trend_true, <span class="at">end =</span> t_index[plot_end_index]))</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date =</span> <span class="fu">ts_to_date</span>(time_ts, <span class="at">start_year =</span> <span class="dv">1948</span>))</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>forecast_trend_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>  <span class="at">time_ts =</span> t_index[(current_train_end_index <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">:</span>plot_end_index],</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">value =</span> fc</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date =</span> <span class="fu">ts_to_date</span>(time_ts, <span class="at">start_year =</span> <span class="dv">1948</span>))</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the true value at plot_end_index</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>true_point <span class="ot">&lt;-</span> true_trend_df <span class="sc">|&gt;</span></span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(time_ts <span class="sc">==</span> t_index[plot_end_index]) <span class="sc">|&gt;</span></span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>)</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the forecast value at plot_end_index</span></span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>forecast_point <span class="ot">&lt;-</span> forecast_trend_df <span class="sc">|&gt;</span></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(time_ts <span class="sc">==</span> t_index[plot_end_index]) <span class="sc">|&gt;</span></span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>)</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>error_value <span class="ot">&lt;-</span> forecast_point<span class="sc">$</span>value <span class="sc">-</span> true_point<span class="sc">$</span>value</span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>error_label <span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="st">"Error = %.3f"</span>, error_value)</span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(true_trend_df, <span class="fu">aes</span>(date, value, <span class="at">color =</span> <span class="st">"True Trend"</span>)) <span class="sc">+</span></span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">20</span>) <span class="sc">+</span></span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="fu">sprintf</span>(</span>
+<span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a>      <span class="st">"True Trend vs STL+ARIMA Forecast for %s"</span>,</span>
+<span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a>      <span class="fu">format</span>(true_point<span class="sc">$</span>date, <span class="st">"%b %Y"</span>)</span>
+<span id="cb15-58"><a href="#cb15-58" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Date"</span>,</span>
+<span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Unemployment Trend"</span></span>
+<span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Error segment (vertical line between true and forecast values)</span></span>
+<span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(</span>
+<span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> true_point,</span>
+<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(</span>
+<span id="cb15-66"><a href="#cb15-66" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> date,</span>
+<span id="cb15-67"><a href="#cb15-67" aria-hidden="true" tabindex="-1"></a>      <span class="at">xend =</span> date,</span>
+<span id="cb15-68"><a href="#cb15-68" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> value,</span>
+<span id="cb15-69"><a href="#cb15-69" aria-hidden="true" tabindex="-1"></a>      <span class="at">yend =</span> forecast_point<span class="sc">$</span>value</span>
+<span id="cb15-70"><a href="#cb15-70" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb15-71"><a href="#cb15-71" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"gray40"</span>,</span>
+<span id="cb15-72"><a href="#cb15-72" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="dv">1</span>,</span>
+<span id="cb15-73"><a href="#cb15-73" aria-hidden="true" tabindex="-1"></a>    <span class="at">linetype =</span> <span class="st">"dashed"</span>,</span>
+<span id="cb15-74"><a href="#cb15-74" aria-hidden="true" tabindex="-1"></a>    <span class="at">inherit.aes =</span> <span class="cn">FALSE</span></span>
+<span id="cb15-75"><a href="#cb15-75" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-76"><a href="#cb15-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(</span>
+<span id="cb15-77"><a href="#cb15-77" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> forecast_trend_df,</span>
+<span id="cb15-78"><a href="#cb15-78" aria-hidden="true" tabindex="-1"></a>    <span class="at">mapping =</span> <span class="fu">aes</span>(date, value, <span class="at">color =</span> <span class="st">"Forecast Trend"</span>),</span>
+<span id="cb15-79"><a href="#cb15-79" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="dv">2</span>,</span>
+<span id="cb15-80"><a href="#cb15-80" aria-hidden="true" tabindex="-1"></a>    <span class="at">lty =</span> <span class="st">"11"</span></span>
+<span id="cb15-81"><a href="#cb15-81" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-82"><a href="#cb15-82" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(</span>
+<span id="cb15-83"><a href="#cb15-83" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="cn">NULL</span>,</span>
+<span id="cb15-84"><a href="#cb15-84" aria-hidden="true" tabindex="-1"></a>    <span class="at">values =</span> <span class="fu">c</span>(<span class="st">"True Trend"</span> <span class="ot">=</span> <span class="st">"black"</span>, <span class="st">"Forecast Trend"</span> <span class="ot">=</span> <span class="st">"pink"</span>)</span>
+<span id="cb15-85"><a href="#cb15-85" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-86"><a href="#cb15-86" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb15-87"><a href="#cb15-87" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"inside"</span>,</span>
+<span id="cb15-88"><a href="#cb15-88" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position.inside =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb15-89"><a href="#cb15-89" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.justification =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb15-90"><a href="#cb15-90" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.background =</span> <span class="fu">element_rect</span>(</span>
+<span id="cb15-91"><a href="#cb15-91" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> <span class="st">"white"</span>,</span>
+<span id="cb15-92"><a href="#cb15-92" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb15-93"><a href="#cb15-93" aria-hidden="true" tabindex="-1"></a>      <span class="at">linewidth =</span> <span class="fl">0.6</span></span>
+<span id="cb15-94"><a href="#cb15-94" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb15-95"><a href="#cb15-95" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.box.background =</span> <span class="fu">element_rect</span>(</span>
+<span id="cb15-96"><a href="#cb15-96" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> <span class="cn">NA</span>,</span>
+<span id="cb15-97"><a href="#cb15-97" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="cn">NA</span></span>
+<span id="cb15-98"><a href="#cb15-98" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb15-99"><a href="#cb15-99" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">14</span>),</span>
+<span id="cb15-100"><a href="#cb15-100" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb15-101"><a href="#cb15-101" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-102"><a href="#cb15-102" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Error numeric annotation</span></span>
+<span id="cb15-103"><a href="#cb15-103" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(</span>
+<span id="cb15-104"><a href="#cb15-104" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> true_point,</span>
+<span id="cb15-105"><a href="#cb15-105" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(</span>
+<span id="cb15-106"><a href="#cb15-106" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> date,</span>
+<span id="cb15-107"><a href="#cb15-107" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> (value <span class="sc">+</span> forecast_point<span class="sc">$</span>value) <span class="sc">/</span> <span class="dv">2</span>,</span>
+<span id="cb15-108"><a href="#cb15-108" aria-hidden="true" tabindex="-1"></a>      <span class="at">label =</span> error_label</span>
+<span id="cb15-109"><a href="#cb15-109" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb15-110"><a href="#cb15-110" aria-hidden="true" tabindex="-1"></a>    <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.1</span>,</span>
+<span id="cb15-111"><a href="#cb15-111" aria-hidden="true" tabindex="-1"></a>    <span class="at">vjust =</span> <span class="fl">0.5</span>,</span>
+<span id="cb15-112"><a href="#cb15-112" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="dv">5</span>,</span>
+<span id="cb15-113"><a href="#cb15-113" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"gray40"</span>,</span>
+<span id="cb15-114"><a href="#cb15-114" aria-hidden="true" tabindex="-1"></a>    <span class="at">inherit.aes =</span> <span class="cn">FALSE</span></span>
+<span id="cb15-115"><a href="#cb15-115" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-116"><a href="#cb15-116" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add points</span></span>
+<span id="cb15-117"><a href="#cb15-117" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> true_point, <span class="fu">aes</span>(date, value), <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb15-118"><a href="#cb15-118" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(</span>
+<span id="cb15-119"><a href="#cb15-119" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> forecast_point,</span>
+<span id="cb15-120"><a href="#cb15-120" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(date, value),</span>
+<span id="cb15-121"><a href="#cb15-121" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"pink"</span>,</span>
+<span id="cb15-122"><a href="#cb15-122" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="dv">3</span></span>
+<span id="cb15-123"><a href="#cb15-123" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-124"><a href="#cb15-124" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add text labels slightly to the right of each point</span></span>
+<span id="cb15-125"><a href="#cb15-125" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(</span>
+<span id="cb15-126"><a href="#cb15-126" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> true_point,</span>
+<span id="cb15-127"><a href="#cb15-127" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> date, <span class="at">y =</span> value, <span class="at">label =</span> <span class="st">"True"</span>),</span>
+<span id="cb15-128"><a href="#cb15-128" aria-hidden="true" tabindex="-1"></a>    <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.2</span>,</span>
+<span id="cb15-129"><a href="#cb15-129" aria-hidden="true" tabindex="-1"></a>    <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.5</span>,</span>
+<span id="cb15-130"><a href="#cb15-130" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="dv">5</span>,</span>
+<span id="cb15-131"><a href="#cb15-131" aria-hidden="true" tabindex="-1"></a>    <span class="at">inherit.aes =</span> <span class="cn">FALSE</span></span>
+<span id="cb15-132"><a href="#cb15-132" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-133"><a href="#cb15-133" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(</span>
+<span id="cb15-134"><a href="#cb15-134" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> forecast_point,</span>
+<span id="cb15-135"><a href="#cb15-135" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">x =</span> date, <span class="at">y =</span> value, <span class="at">label =</span> <span class="st">"Forecast"</span>),</span>
+<span id="cb15-136"><a href="#cb15-136" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"pink"</span>,</span>
+<span id="cb15-137"><a href="#cb15-137" aria-hidden="true" tabindex="-1"></a>    <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.2</span>,</span>
+<span id="cb15-138"><a href="#cb15-138" aria-hidden="true" tabindex="-1"></a>    <span class="at">vjust =</span> <span class="fl">1.2</span>,</span>
+<span id="cb15-139"><a href="#cb15-139" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="dv">5</span>,</span>
+<span id="cb15-140"><a href="#cb15-140" aria-hidden="true" tabindex="-1"></a>    <span class="at">inherit.aes =</span> <span class="cn">FALSE</span></span>
+<span id="cb15-141"><a href="#cb15-141" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-142"><a href="#cb15-142" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Expand x-axis range so labels aren't cropped</span></span>
+<span id="cb15-143"><a href="#cb15-143" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_date</span>(<span class="at">expand =</span> <span class="fu">expansion</span>(<span class="at">mult =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.2</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="unemployment_data_analysis_files/figure-html/unnamed-chunk-12-1.svg" class="img-fluid figure-img" style="width:90.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="stl-arima-trend-forecast" class="level2">
+<h2 class="anchored" data-anchor-id="stl-arima-trend-forecast">STL + ARIMA Trend Forecast</h2>
+<p>Forecast the next 3 years of the U.S. Unemployment Trend.<br>
+Click on the autoscale button at the top right to view the whole date range, and click the home button to zoom back in.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit ARIMA on the trend</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>fit_trend_arima <span class="ot">&lt;-</span> <span class="fu">auto.arima</span>(trend_true)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Forecast 36 months</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>h_forecast <span class="ot">&lt;-</span> <span class="dv">36</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>fc <span class="ot">&lt;-</span> <span class="fu">forecast</span>(fit_trend_arima, <span class="at">h =</span> h_forecast)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Build a tidy data frame for Plotly</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>df_hist <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">date =</span> <span class="fu">as.numeric</span>(<span class="fu">time</span>(trend_true)),</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">value =</span> <span class="fu">as.numeric</span>(trend_true),</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"History"</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>df_fc <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">date =</span> <span class="fu">as.numeric</span>(<span class="fu">time</span>(fc<span class="sc">$</span>mean)),</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">value =</span> <span class="fu">as.numeric</span>(fc<span class="sc">$</span>mean),</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">lo80 =</span> <span class="fu">as.numeric</span>(fc<span class="sc">$</span>lower[, <span class="st">"80%"</span>]),</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">hi80 =</span> <span class="fu">as.numeric</span>(fc<span class="sc">$</span>upper[, <span class="st">"80%"</span>]),</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">lo95 =</span> <span class="fu">as.numeric</span>(fc<span class="sc">$</span>lower[, <span class="st">"95%"</span>]),</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">hi95 =</span> <span class="fu">as.numeric</span>(fc<span class="sc">$</span>upper[, <span class="st">"95%"</span>]),</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"Forecast"</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Plotly interactive trend forecast</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">plot_ly</span>() <span class="sc">|&gt;</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 95% CI ribbon</span></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_ribbons</span>(</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> df_fc,</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="sc">~</span>date,</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">ymin =</span> <span class="sc">~</span>lo95,</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">ymax =</span> <span class="sc">~</span>hi95,</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">fillcolor =</span> <span class="st">'rgba(135,206,250,0.25)'</span>,</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">line =</span> <span class="fu">list</span>(<span class="at">color =</span> <span class="st">'transparent'</span>),</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"95% CI"</span></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># 80% CI ribbon</span></span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_ribbons</span>(</span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> df_fc,</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="sc">~</span>date,</span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">ymin =</span> <span class="sc">~</span>lo80,</span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">ymax =</span> <span class="sc">~</span>hi80,</span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">fillcolor =</span> <span class="st">'rgba(135,206,250,0.45)'</span>,</span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">line =</span> <span class="fu">list</span>(<span class="at">color =</span> <span class="st">'transparent'</span>),</span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"80% CI"</span></span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Historical trend line</span></span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_lines</span>(</span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> df_hist,</span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="sc">~</span>date,</span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="sc">~</span>value,</span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">line =</span> <span class="fu">list</span>(<span class="at">color =</span> <span class="st">'black'</span>),</span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Historical Trend"</span></span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Forecast line</span></span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_lines</span>(</span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> df_fc,</span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="sc">~</span>date,</span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="sc">~</span>value,</span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">line =</span> <span class="fu">list</span>(<span class="at">color =</span> <span class="st">'blue'</span>, <span class="at">dash =</span> <span class="st">"dash"</span>),</span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Forecast Trend"</span></span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb16-62"><a href="#cb16-62" aria-hidden="true" tabindex="-1"></a>  <span class="fu">layout</span>(</span>
+<span id="cb16-63"><a href="#cb16-63" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"3-Year Forecast of Unemployment Trend</span><span class="sc">\n</span><span class="st">(ARIMA on STL Trend)"</span>,</span>
+<span id="cb16-64"><a href="#cb16-64" aria-hidden="true" tabindex="-1"></a>    <span class="at">xaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">"Year"</span>, <span class="at">range =</span> <span class="fu">c</span>(<span class="dv">2019</span>, <span class="dv">2029</span>)),</span>
+<span id="cb16-65"><a href="#cb16-65" aria-hidden="true" tabindex="-1"></a>    <span class="at">yaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">"Unemployment Trend"</span>),</span>
+<span id="cb16-66"><a href="#cb16-66" aria-hidden="true" tabindex="-1"></a>    <span class="at">hovermode =</span> <span class="st">"x unified"</span>,</span>
+<span id="cb16-67"><a href="#cb16-67" aria-hidden="true" tabindex="-1"></a>    <span class="at">font =</span> <span class="fu">list</span>(<span class="at">color =</span> <span class="st">'black'</span>, <span class="at">size =</span> <span class="dv">20</span>),</span>
+<span id="cb16-68"><a href="#cb16-68" aria-hidden="true" tabindex="-1"></a>    <span class="at">margin =</span> <span class="fu">list</span>(<span class="at">t =</span> <span class="dv">150</span>),</span>
+<span id="cb16-69"><a href="#cb16-69" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend =</span> <span class="fu">list</span>(<span class="at">x =</span> <span class="fl">0.7</span>, <span class="at">y =</span> <span class="dv">1</span>)</span>
+<span id="cb16-70"><a href="#cb16-70" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb16-71"><a href="#cb16-71" aria-hidden="true" tabindex="-1"></a>p</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-25f040fefe7f6f791db7" style="width:90%;height:672px;"></div>
+<script type="application/json" data-for="htmlwidget-25f040fefe7f6f791db7">{"x":{"visdat":{"47ff71753e9c7":["function () ","plotlyVisDat"],"47ff72735a1aa":["function () ","data"],"47ff77b7939af":["function () ","data"],"47ff736f86024":["function () ","data"],"47ff779f63a5a":["function () ","data"]},"cur_data":"47ff779f63a5a","attrs":{"47ff72735a1aa":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":{},"ymin":{},"ymax":{},"type":"scatter","mode":"lines","hoveron":"points","fill":"toself","fillcolor":"rgba(135,206,250,0.25)","line":{"color":"transparent"},"name":"95% CI","inherit":true},"47ff77b7939af":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":{},"ymin":{},"ymax":{},"type":"scatter","mode":"lines","hoveron":"points","fill":"toself","fillcolor":"rgba(135,206,250,0.45)","line":{"color":"transparent"},"name":"80% CI","inherit":true},"47ff736f86024":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":{},"y":{},"type":"scatter","mode":"lines","line":{"color":"black"},"name":"Historical Trend","inherit":true},"47ff779f63a5a":{"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"x":{},"y":{},"type":"scatter","mode":"lines","line":{"color":"blue","dash":"dash"},"name":"Forecast Trend","inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":150,"r":10},"title":"3-Year Forecast of Unemployment Trend<br />(ARIMA on STL Trend)","xaxis":{"domain":[0,1],"automargin":true,"title":"Year","range":[2019,2029]},"yaxis":{"domain":[0,1],"automargin":true,"title":"Unemployment Trend"},"hovermode":"x unified","font":{"color":"black","size":20},"legend":{"x":0.69999999999999996,"y":1},"showlegend":true},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"fillcolor":"rgba(135,206,250,0.25)","x":[2025.75,2025.8333333333333,2025.9166666666667,2026,2026.0833333333333,2026.1666666666667,2026.25,2026.3333333333333,2026.4166666666667,2026.5,2026.5833333333333,2026.6666666666667,2026.75,2026.8333333333333,2026.9166666666667,2027,2027.0833333333333,2027.1666666666667,2027.25,2027.3333333333335,2027.4166666666667,2027.5,2027.5833333333335,2027.6666666666667,2027.75,2027.8333333333335,2027.9166666666667,2028,2028.0833333333335,2028.1666666666667,2028.25,2028.3333333333335,2028.4166666666667,2028.5,2028.5833333333335,2028.6666666666667,2028.6666666666667,2028.6666666666667,2028.5833333333335,2028.5,2028.4166666666667,2028.3333333333335,2028.25,2028.1666666666667,2028.0833333333335,2028,2027.9166666666667,2027.8333333333335,2027.75,2027.6666666666667,2027.5833333333335,2027.5,2027.4166666666667,2027.3333333333335,2027.25,2027.1666666666667,2027.0833333333333,2027,2026.9166666666667,2026.8333333333333,2026.75,2026.6666666666667,2026.5833333333333,2026.5,2026.4166666666667,2026.3333333333333,2026.25,2026.1666666666667,2026.0833333333333,2026,2025.9166666666667,2025.8333333333333,2025.75],"type":"scatter","mode":"lines","hoveron":"points","fill":"toself","line":{"color":"transparent"},"name":"95% CI","y":[4.22812442721112,4.2045756366665392,4.1320358823695473,4.0419267754032884,3.9102372861274994,3.7599148230830597,3.5912179699250117,3.4104115527508547,3.226032155393455,3.0372174529217242,2.8531572083640002,2.6701617542338951,2.5009299596323271,2.3389458757409933,2.1925397846715446,2.0577199397199388,1.9352561783095283,1.8243149751759828,1.722749617862799,1.6302672905427675,1.5445581730404712,1.4651322903446524,1.3908828735027523,1.3207343866234971,1.2545358360572063,1.1911558109050908,1.1303325126341668,1.0717023975839051,1.0144999129769356,0.95912756256525711,0.90524765980651933,0.85291332625039473,0.80203781139264096,0.75245151996464443,0.70430218565397462,0.65721829476694449,0.65721829476694449,7.6846824051463853,7.6373860303542802,7.5889852165775711,7.5396662857233245,7.4890250861236876,7.4369850298056104,7.3833431152562721,7.3276857028344207,7.2700563790034334,7.2095024628131572,7.1464653230646888,7.0805034121702324,7.0113030837182819,6.9389170063448908,6.8620628552395218,6.7804259554058977,6.6924007218828026,6.5966547581887305,6.4921763096250258,6.3767948332440323,6.250661402282204,6.1113231474240282,5.9612947999301049,5.801077425979587,5.6344434672908807,5.4666592018630427,5.2990412717825679,5.1370516313888324,4.9802283835000498,4.8328011494274854,4.6974715078719598,4.5765518714337681,4.4739033661880327,4.3880636444700789,4.3199994390263514,4.2807363613587102],"marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(31,119,180,1)"}},"error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"xaxis":"x","yaxis":"y","frame":null},{"fillcolor":"rgba(135,206,250,0.45)","x":[2025.75,2025.8333333333333,2025.9166666666667,2026,2026.0833333333333,2026.1666666666667,2026.25,2026.3333333333333,2026.4166666666667,2026.5,2026.5833333333333,2026.6666666666667,2026.75,2026.8333333333333,2026.9166666666667,2027,2027.0833333333333,2027.1666666666667,2027.25,2027.3333333333335,2027.4166666666667,2027.5,2027.5833333333335,2027.6666666666667,2027.75,2027.8333333333335,2027.9166666666667,2028,2028.0833333333335,2028.1666666666667,2028.25,2028.3333333333335,2028.4166666666667,2028.5,2028.5833333333335,2028.6666666666667,2028.6666666666667,2028.6666666666667,2028.5833333333335,2028.5,2028.4166666666667,2028.3333333333335,2028.25,2028.1666666666667,2028.0833333333335,2028,2027.9166666666667,2027.8333333333335,2027.75,2027.6666666666667,2027.5833333333335,2027.5,2027.4166666666667,2027.3333333333335,2027.25,2027.1666666666667,2027.0833333333333,2027,2026.9166666666667,2026.8333333333333,2026.75,2026.6666666666667,2026.5833333333333,2026.5,2026.4166666666667,2026.3333333333333,2026.25,2026.1666666666667,2026.0833333333333,2026,2025.9166666666667,2025.8333333333333,2025.75],"type":"scatter","mode":"lines","hoveron":"points","fill":"toself","line":{"color":"transparent"},"name":"80% CI","y":[4.2372298469521548,4.2245517539794681,4.1763459857149856,4.1166879154587415,4.0255547340998046,3.9221754828426461,3.8060957571788432,3.682095941323499,3.556767657597514,3.4286658112585249,3.3054696547774487,3.183182795284019,3.072078471376984,2.9658570117334748,2.8707541094281117,2.7833821413625701,2.703942492630512,2.6321704063006672,2.5662645503524466,2.506358436482639,2.4507171014170188,2.3991659635552431,2.3510676744530721,2.3055872986431618,2.2628219034227319,2.2218267731980355,2.1824397002958884,2.1444364762439574,2.107107653998773,2.0709509551446059,2.0356795923259212,2.0014090810834371,1.9681028175912054,1.9356338129167012,1.9041941783849534,1.8734444509952799,1.8734444509952799,6.4684562489180504,6.437494037623301,6.4058029236255143,6.3736012795247596,6.3405293312906448,6.3065530972862085,6.2715197226769233,6.2350779618125838,6.1973223003433819,6.157395275151436,6.1157943607717442,6.0722173448047068,6.0264501716986176,5.9787322053945715,5.928029182028931,5.87426702702935,5.8163095759429311,5.7531398256990833,5.6843208785003414,5.6081085189230482,5.5249992006395727,5.4331088226674611,5.3343836639376239,5.2299289142349297,5.1214224262407573,5.0143467554495942,4.9075929134457672,4.8063161291847729,4.7085439949274051,4.617923362173654,4.5352108481123734,4.4612344234614625,4.3991422261325797,4.3437535411246406,4.3000233217134225,4.2716309416176754],"marker":{"color":"rgba(255,127,14,1)","line":{"color":"rgba(255,127,14,1)"}},"error_y":{"color":"rgba(255,127,14,1)"},"error_x":{"color":"rgba(255,127,14,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[1948,1948.0833333333333,1948.1666666666667,1948.25,1948.3333333333333,1948.4166666666667,1948.5,1948.5833333333333,1948.6666666666667,1948.75,1948.8333333333333,1948.9166666666667,1949,1949.0833333333333,1949.1666666666667,1949.25,1949.3333333333333,1949.4166666666667,1949.5,1949.5833333333333,1949.6666666666667,1949.75,1949.8333333333333,1949.9166666666667,1950,1950.0833333333333,1950.1666666666667,1950.25,1950.3333333333333,1950.4166666666667,1950.5,1950.5833333333333,1950.6666666666667,1950.75,1950.8333333333333,1950.9166666666667,1951,1951.0833333333333,1951.1666666666667,1951.25,1951.3333333333333,1951.4166666666667,1951.5,1951.5833333333333,1951.6666666666667,1951.75,1951.8333333333333,1951.9166666666667,1952,1952.0833333333333,1952.1666666666667,1952.25,1952.3333333333333,1952.4166666666667,1952.5,1952.5833333333333,1952.6666666666667,1952.75,1952.8333333333333,1952.9166666666667,1953,1953.0833333333333,1953.1666666666667,1953.25,1953.3333333333333,1953.4166666666667,1953.5,1953.5833333333333,1953.6666666666667,1953.75,1953.8333333333333,1953.9166666666667,1954,1954.0833333333333,1954.1666666666667,1954.25,1954.3333333333333,1954.4166666666667,1954.5,1954.5833333333333,1954.6666666666667,1954.75,1954.8333333333333,1954.9166666666667,1955,1955.0833333333333,1955.1666666666667,1955.25,1955.3333333333333,1955.4166666666667,1955.5,1955.5833333333333,1955.6666666666667,1955.75,1955.8333333333333,1955.9166666666667,1956,1956.0833333333333,1956.1666666666667,1956.25,1956.3333333333333,1956.4166666666667,1956.5,1956.5833333333333,1956.6666666666667,1956.75,1956.8333333333333,1956.9166666666667,1957,1957.0833333333333,1957.1666666666667,1957.25,1957.3333333333333,1957.4166666666667,1957.5,1957.5833333333333,1957.6666666666667,1957.75,1957.8333333333333,1957.9166666666667,1958,1958.0833333333333,1958.1666666666667,1958.25,1958.3333333333333,1958.4166666666667,1958.5,1958.5833333333333,1958.6666666666667,1958.75,1958.8333333333333,1958.9166666666667,1959,1959.0833333333333,1959.1666666666667,1959.25,1959.3333333333333,1959.4166666666667,1959.5,1959.5833333333333,1959.6666666666667,1959.75,1959.8333333333333,1959.9166666666667,1960,1960.0833333333333,1960.1666666666667,1960.25,1960.3333333333333,1960.4166666666667,1960.5,1960.5833333333333,1960.6666666666667,1960.75,1960.8333333333333,1960.9166666666667,1961,1961.0833333333333,1961.1666666666667,1961.25,1961.3333333333333,1961.4166666666667,1961.5,1961.5833333333333,1961.6666666666667,1961.75,1961.8333333333333,1961.9166666666667,1962,1962.0833333333333,1962.1666666666667,1962.25,1962.3333333333333,1962.4166666666667,1962.5,1962.5833333333333,1962.6666666666667,1962.75,1962.8333333333333,1962.9166666666667,1963,1963.0833333333333,1963.1666666666667,1963.25,1963.3333333333333,1963.4166666666667,1963.5,1963.5833333333333,1963.6666666666667,1963.75,1963.8333333333333,1963.9166666666667,1964,1964.0833333333333,1964.1666666666667,1964.25,1964.3333333333333,1964.4166666666667,1964.5,1964.5833333333333,1964.6666666666667,1964.75,1964.8333333333333,1964.9166666666667,1965,1965.0833333333333,1965.1666666666667,1965.25,1965.3333333333333,1965.4166666666667,1965.5,1965.5833333333333,1965.6666666666667,1965.75,1965.8333333333333,1965.9166666666667,1966,1966.0833333333333,1966.1666666666667,1966.25,1966.3333333333333,1966.4166666666667,1966.5,1966.5833333333333,1966.6666666666667,1966.75,1966.8333333333333,1966.9166666666667,1967,1967.0833333333333,1967.1666666666667,1967.25,1967.3333333333333,1967.4166666666667,1967.5,1967.5833333333333,1967.6666666666667,1967.75,1967.8333333333333,1967.9166666666667,1968,1968.0833333333333,1968.1666666666667,1968.25,1968.3333333333333,1968.4166666666667,1968.5,1968.5833333333333,1968.6666666666667,1968.75,1968.8333333333333,1968.9166666666667,1969,1969.0833333333333,1969.1666666666667,1969.25,1969.3333333333333,1969.4166666666667,1969.5,1969.5833333333333,1969.6666666666667,1969.75,1969.8333333333333,1969.9166666666667,1970,1970.0833333333333,1970.1666666666667,1970.25,1970.3333333333333,1970.4166666666667,1970.5,1970.5833333333333,1970.6666666666667,1970.75,1970.8333333333333,1970.9166666666667,1971,1971.0833333333333,1971.1666666666667,1971.25,1971.3333333333333,1971.4166666666667,1971.5,1971.5833333333333,1971.6666666666667,1971.75,1971.8333333333333,1971.9166666666667,1972,1972.0833333333333,1972.1666666666667,1972.25,1972.3333333333333,1972.4166666666667,1972.5,1972.5833333333333,1972.6666666666667,1972.75,1972.8333333333333,1972.9166666666667,1973,1973.0833333333333,1973.1666666666667,1973.25,1973.3333333333333,1973.4166666666667,1973.5,1973.5833333333333,1973.6666666666667,1973.75,1973.8333333333333,1973.9166666666667,1974,1974.0833333333333,1974.1666666666667,1974.25,1974.3333333333333,1974.4166666666667,1974.5,1974.5833333333333,1974.6666666666667,1974.75,1974.8333333333333,1974.9166666666667,1975,1975.0833333333333,1975.1666666666667,1975.25,1975.3333333333333,1975.4166666666667,1975.5,1975.5833333333333,1975.6666666666667,1975.75,1975.8333333333333,1975.9166666666667,1976,1976.0833333333333,1976.1666666666667,1976.25,1976.3333333333333,1976.4166666666667,1976.5,1976.5833333333333,1976.6666666666667,1976.75,1976.8333333333333,1976.9166666666667,1977,1977.0833333333333,1977.1666666666667,1977.25,1977.3333333333333,1977.4166666666667,1977.5,1977.5833333333333,1977.6666666666667,1977.75,1977.8333333333333,1977.9166666666667,1978,1978.0833333333333,1978.1666666666667,1978.25,1978.3333333333333,1978.4166666666667,1978.5,1978.5833333333333,1978.6666666666667,1978.75,1978.8333333333333,1978.9166666666667,1979,1979.0833333333333,1979.1666666666667,1979.25,1979.3333333333333,1979.4166666666667,1979.5,1979.5833333333333,1979.6666666666667,1979.75,1979.8333333333333,1979.9166666666667,1980,1980.0833333333333,1980.1666666666667,1980.25,1980.3333333333333,1980.4166666666667,1980.5,1980.5833333333333,1980.6666666666667,1980.75,1980.8333333333333,1980.9166666666667,1981,1981.0833333333333,1981.1666666666667,1981.25,1981.3333333333333,1981.4166666666667,1981.5,1981.5833333333333,1981.6666666666667,1981.75,1981.8333333333333,1981.9166666666667,1982,1982.0833333333333,1982.1666666666667,1982.25,1982.3333333333333,1982.4166666666667,1982.5,1982.5833333333333,1982.6666666666667,1982.75,1982.8333333333333,1982.9166666666667,1983,1983.0833333333333,1983.1666666666667,1983.25,1983.3333333333333,1983.4166666666667,1983.5,1983.5833333333333,1983.6666666666667,1983.75,1983.8333333333333,1983.9166666666667,1984,1984.0833333333333,1984.1666666666667,1984.25,1984.3333333333333,1984.4166666666667,1984.5,1984.5833333333335,1984.6666666666667,1984.75,1984.8333333333335,1984.9166666666667,1985,1985.0833333333335,1985.1666666666667,1985.25,1985.3333333333335,1985.4166666666667,1985.5,1985.5833333333335,1985.6666666666667,1985.75,1985.8333333333335,1985.9166666666667,1986,1986.0833333333335,1986.1666666666667,1986.25,1986.3333333333335,1986.4166666666667,1986.5,1986.5833333333335,1986.6666666666667,1986.75,1986.8333333333335,1986.9166666666667,1987,1987.0833333333335,1987.1666666666667,1987.25,1987.3333333333335,1987.4166666666667,1987.5,1987.5833333333335,1987.6666666666667,1987.75,1987.8333333333335,1987.9166666666667,1988,1988.0833333333335,1988.1666666666667,1988.25,1988.3333333333335,1988.4166666666667,1988.5,1988.5833333333335,1988.6666666666667,1988.75,1988.8333333333335,1988.9166666666667,1989,1989.0833333333335,1989.1666666666667,1989.25,1989.3333333333335,1989.4166666666667,1989.5,1989.5833333333335,1989.6666666666667,1989.75,1989.8333333333335,1989.9166666666667,1990,1990.0833333333335,1990.1666666666667,1990.25,1990.3333333333335,1990.4166666666667,1990.5,1990.5833333333335,1990.6666666666667,1990.75,1990.8333333333335,1990.9166666666667,1991,1991.0833333333335,1991.1666666666667,1991.25,1991.3333333333335,1991.4166666666667,1991.5,1991.5833333333335,1991.6666666666667,1991.75,1991.8333333333335,1991.9166666666667,1992,1992.0833333333335,1992.1666666666667,1992.25,1992.3333333333335,1992.4166666666667,1992.5,1992.5833333333335,1992.6666666666667,1992.75,1992.8333333333335,1992.9166666666667,1993,1993.0833333333335,1993.1666666666667,1993.25,1993.3333333333335,1993.4166666666667,1993.5,1993.5833333333335,1993.6666666666667,1993.75,1993.8333333333335,1993.9166666666667,1994,1994.0833333333335,1994.1666666666667,1994.25,1994.3333333333335,1994.4166666666667,1994.5,1994.5833333333335,1994.6666666666667,1994.75,1994.8333333333335,1994.9166666666667,1995,1995.0833333333335,1995.1666666666667,1995.25,1995.3333333333335,1995.4166666666667,1995.5,1995.5833333333335,1995.6666666666667,1995.75,1995.8333333333335,1995.9166666666667,1996,1996.0833333333335,1996.1666666666667,1996.25,1996.3333333333335,1996.4166666666667,1996.5,1996.5833333333335,1996.6666666666667,1996.75,1996.8333333333335,1996.9166666666667,1997,1997.0833333333335,1997.1666666666667,1997.25,1997.3333333333335,1997.4166666666667,1997.5,1997.5833333333335,1997.6666666666667,1997.75,1997.8333333333335,1997.9166666666667,1998,1998.0833333333335,1998.1666666666667,1998.25,1998.3333333333335,1998.4166666666667,1998.5,1998.5833333333335,1998.6666666666667,1998.75,1998.8333333333335,1998.9166666666667,1999,1999.0833333333335,1999.1666666666667,1999.25,1999.3333333333335,1999.4166666666667,1999.5,1999.5833333333335,1999.6666666666667,1999.75,1999.8333333333335,1999.9166666666667,2000,2000.0833333333335,2000.1666666666667,2000.25,2000.3333333333335,2000.4166666666667,2000.5,2000.5833333333335,2000.6666666666667,2000.75,2000.8333333333335,2000.9166666666667,2001,2001.0833333333335,2001.1666666666667,2001.25,2001.3333333333335,2001.4166666666667,2001.5,2001.5833333333335,2001.6666666666667,2001.75,2001.8333333333335,2001.9166666666667,2002,2002.0833333333335,2002.1666666666667,2002.25,2002.3333333333335,2002.4166666666667,2002.5,2002.5833333333335,2002.6666666666667,2002.75,2002.8333333333335,2002.9166666666667,2003,2003.0833333333335,2003.1666666666667,2003.25,2003.3333333333335,2003.4166666666667,2003.5,2003.5833333333335,2003.6666666666667,2003.75,2003.8333333333335,2003.9166666666667,2004,2004.0833333333335,2004.1666666666667,2004.25,2004.3333333333335,2004.4166666666667,2004.5,2004.5833333333335,2004.6666666666667,2004.75,2004.8333333333335,2004.9166666666667,2005,2005.0833333333335,2005.1666666666667,2005.25,2005.3333333333335,2005.4166666666667,2005.5,2005.5833333333335,2005.6666666666667,2005.75,2005.8333333333335,2005.9166666666667,2006,2006.0833333333335,2006.1666666666667,2006.25,2006.3333333333335,2006.4166666666667,2006.5,2006.5833333333335,2006.6666666666667,2006.75,2006.8333333333335,2006.9166666666667,2007,2007.0833333333335,2007.1666666666667,2007.25,2007.3333333333335,2007.4166666666667,2007.5,2007.5833333333335,2007.6666666666667,2007.75,2007.8333333333335,2007.9166666666667,2008,2008.0833333333335,2008.1666666666667,2008.25,2008.3333333333335,2008.4166666666667,2008.5,2008.5833333333335,2008.6666666666667,2008.75,2008.8333333333335,2008.9166666666667,2009,2009.0833333333335,2009.1666666666667,2009.25,2009.3333333333335,2009.4166666666667,2009.5,2009.5833333333335,2009.6666666666667,2009.75,2009.8333333333335,2009.9166666666667,2010,2010.0833333333335,2010.1666666666667,2010.25,2010.3333333333335,2010.4166666666667,2010.5,2010.5833333333335,2010.6666666666667,2010.75,2010.8333333333335,2010.9166666666667,2011,2011.0833333333335,2011.1666666666667,2011.25,2011.3333333333335,2011.4166666666667,2011.5,2011.5833333333335,2011.6666666666667,2011.75,2011.8333333333335,2011.9166666666667,2012,2012.0833333333335,2012.1666666666667,2012.25,2012.3333333333335,2012.4166666666667,2012.5,2012.5833333333335,2012.6666666666667,2012.75,2012.8333333333335,2012.9166666666667,2013,2013.0833333333335,2013.1666666666667,2013.25,2013.3333333333335,2013.4166666666667,2013.5,2013.5833333333335,2013.6666666666667,2013.75,2013.8333333333335,2013.9166666666667,2014,2014.0833333333335,2014.1666666666667,2014.25,2014.3333333333335,2014.4166666666667,2014.5,2014.5833333333335,2014.6666666666667,2014.75,2014.8333333333335,2014.9166666666667,2015,2015.0833333333335,2015.1666666666667,2015.25,2015.3333333333335,2015.4166666666667,2015.5,2015.5833333333335,2015.6666666666667,2015.75,2015.8333333333335,2015.9166666666667,2016,2016.0833333333335,2016.1666666666667,2016.25,2016.3333333333335,2016.4166666666667,2016.5,2016.5833333333335,2016.6666666666667,2016.75,2016.8333333333335,2016.9166666666667,2017,2017.0833333333335,2017.1666666666667,2017.25,2017.3333333333335,2017.4166666666667,2017.5,2017.5833333333335,2017.6666666666667,2017.75,2017.8333333333335,2017.9166666666667,2018,2018.0833333333335,2018.1666666666667,2018.25,2018.3333333333335,2018.4166666666667,2018.5,2018.5833333333335,2018.6666666666667,2018.75,2018.8333333333335,2018.9166666666667,2019,2019.0833333333335,2019.1666666666667,2019.25,2019.3333333333335,2019.4166666666667,2019.5,2019.5833333333335,2019.6666666666667,2019.75,2019.8333333333335,2019.9166666666667,2020,2020.0833333333335,2020.1666666666667,2020.25,2020.3333333333335,2020.4166666666667,2020.5,2020.5833333333335,2020.6666666666667,2020.75,2020.8333333333335,2020.9166666666667,2021,2021.0833333333335,2021.1666666666667,2021.25,2021.3333333333335,2021.4166666666667,2021.5,2021.5833333333335,2021.6666666666667,2021.75,2021.8333333333335,2021.9166666666667,2022,2022.0833333333335,2022.1666666666667,2022.25,2022.3333333333335,2022.4166666666667,2022.5,2022.5833333333335,2022.6666666666667,2022.75,2022.8333333333335,2022.9166666666667,2023,2023.0833333333335,2023.1666666666667,2023.25,2023.3333333333335,2023.4166666666667,2023.5,2023.5833333333335,2023.6666666666667,2023.75,2023.8333333333335,2023.9166666666667,2024,2024.0833333333335,2024.1666666666667,2024.25,2024.3333333333335,2024.4166666666667,2024.5,2024.5833333333335,2024.6666666666667,2024.75,2024.8333333333335,2024.9166666666667,2025,2025.0833333333335,2025.1666666666667,2025.25,2025.3333333333335,2025.4166666666667,2025.5,2025.5833333333335,2025.6666666666667],"y":[3.5238697581002354,3.5688083343869037,3.613746910673572,3.6671804589520081,3.7206140072304441,3.7816574574503332,3.8427009076702223,3.9075744992344177,3.9724480907986126,4.0868419824188962,4.2012358740391802,4.415209943532405,4.6291840130256299,4.8925561593950304,5.155928305764431,5.434021368311849,5.7121144308592671,5.9444744277802473,6.1768344247012275,6.3206322239418125,6.4644300231823966,6.4940363766160747,6.5236427300497537,6.4338221223282304,6.3440015146067061,6.1591915549338569,5.9743815952610069,5.7459969104489943,5.5176122256369826,5.2877161337899441,5.0578200419429047,4.8281677360375763,4.5985154301322479,4.3812207035719268,4.1639259770116048,3.9826967094636663,3.8014674419157282,3.6688078906391128,3.5361483393624979,3.4501260285914865,3.3641037178204756,3.3116371059295044,3.2591704940385338,3.2346428273258048,3.2101151606130758,3.1963523085086889,3.1825894564043025,3.171142862061151,3.1596962677180001,3.1454036600364348,3.1311110523548695,3.1049427054549996,3.0787743585551293,3.0496472407423809,3.020520122929633,2.9943052651614197,2.968090407393206,2.9339503979353254,2.8998103884774449,2.8498642512395316,2.7999181140016178,2.7589366511622098,2.7179551883228013,2.7327803135561011,2.7476054387894013,2.8583176886515829,2.9690299385137644,3.1808528203047786,3.3926757020957923,3.6734284957574173,3.9541812894190422,4.2504147765302402,4.5466482636414387,4.8195081933074855,5.0923681229735323,5.2854487230902603,5.4785293232069883,5.5440089312120859,5.6094885392171836,5.5649215689330216,5.5203545986488605,5.4135528835464495,5.3067511684440376,5.1638746930310298,5.0209982176180228,4.8678198403617037,4.7146414631053846,4.5921647986478877,4.4696881341903918,4.3904228450678779,4.3111575559453641,4.2583773588050029,4.2055971616646408,4.1790219626855567,4.1524467637064717,4.1516295885764691,4.1508124134464666,4.1488932341594076,4.1469740548723495,4.1392230680888744,4.1314720813053984,4.1318578630268785,4.1322436447483577,4.1282336051866668,4.1242235656249751,4.1069859340555173,4.0897483024860604,4.0772537422339248,4.0647591819817901,4.0726167607012691,4.0804743394207481,4.1220767241614356,4.163679108902123,4.2638216504518578,4.3639641920015935,4.5552726504324026,4.7465811088632117,5.0114589255576938,5.2763367422521759,5.565898324989492,5.8554599077268072,6.1241750557184833,6.3928902037101585,6.5768857046539591,6.7608812055977587,6.8233654573571059,6.8858497091164539,6.8271371042783926,6.7684244994403322,6.6109693119165938,6.4535141243928553,6.2527871394251537,6.052060154457453,5.8784023778547461,5.70474460125204,5.6013000798668902,5.4978555584817403,5.4406621946173406,5.3834688307529399,5.3507725281165177,5.3180762254800955,5.3130690033611456,5.3080617812421957,5.3179260141574876,5.3277902470727803,5.3368444104528638,5.3458985738329483,5.3776877667625875,5.4094769596922267,5.5001611461127276,5.5908453325332284,5.7347158921468324,5.8785864517604365,6.0363093918066237,6.1940323318528119,6.3366426213536702,6.4792529108545285,6.5791066872671387,6.6789604636797497,6.7139919073406977,6.7490233510016457,6.7080921770167414,6.667161003031838,6.5684037933751309,6.4696465837184247,6.3431424669777705,6.2166383502371154,6.0889120862793007,5.9611858223214869,5.8569768447884929,5.7527678672554989,5.6852495920574899,5.6177313168594809,5.5929044874769342,5.5680776580943876,5.5769845550816814,5.5858914520689762,5.6075015209246555,5.6291115897803339,5.6437204703919646,5.6583293510035952,5.6577220748236901,5.6571147986437849,5.6501478481783849,5.643180897712984,5.6313833306190499,5.619585763525115,5.597476404128626,5.5753670447321371,5.5420104612220022,5.5086538777118674,5.4655765045096638,5.4224991313074602,5.3754849466082941,5.3284707619091281,5.2760788745585643,5.2236869872080005,5.1723079642122709,5.1209289412165413,5.0794080073976184,5.0378870735786956,5.000452597433517,4.9630181212883375,4.9186774519444771,4.8743367826006159,4.8172210922304899,4.760105401860363,4.6897014941770871,4.6192975864938113,4.5399490913477907,4.4606005962017701,4.376821683649081,4.2930427710963919,4.217480770942565,4.141918770788739,4.0779522073570034,4.0139856439252677,3.9615351383476067,3.9090846327699453,3.8687298134400008,3.8283749941100567,3.8073446886919475,3.786314383273838,3.7822753645565035,3.7782363458391695,3.7797252917433668,3.7812142376475641,3.7829185628040554,3.7846228879605466,3.7905214364445943,3.7964199849286424,3.8071859359985458,3.8179518870684488,3.8235036064421135,3.8290553258157782,3.8257604901048325,3.8224656543938869,3.8085922303813282,3.7947188063687691,3.7728773148473786,3.7510358233259877,3.7201474235386534,3.689259023751319,3.6505872834813617,3.6119155432114045,3.5766820580213707,3.541448572831337,3.5173716031590256,3.4932946334867148,3.4762675156714993,3.4592403978562842,3.447003979006892,3.4347675601575003,3.4358399737444318,3.4369123873313634,3.4520401712545006,3.4671679551776378,3.4943570841639797,3.5215462131503221,3.5797304322489847,3.6379146513476477,3.7329463004287677,3.8279779495098878,3.9477316393335533,4.0674853291572193,4.2076402569489684,4.3477951847407166,4.5154588033483316,4.6831224219559466,4.8639145286910743,5.044706635426202,5.2016743793255937,5.3586421232249846,5.4789459400779474,5.5992497569309112,5.6881409119235951,5.777032066916278,5.8353732662901905,5.8937144656641021,5.9175985239906925,5.9414825823172821,5.9415896368403569,5.9416966913634308,5.9336700284599715,5.9256433655565113,5.9097412167830576,5.8938390680096031,5.8667156997354848,5.8395923314613665,5.8024935280741614,5.7653947246869564,5.7227989484517998,5.6802031722166424,5.6250721459844311,5.5699411197522197,5.5057437616526457,5.4415464035530725,5.3727370236133485,5.3039276436736236,5.2327272986301008,5.1615269535865771,5.0918959771531114,5.0222650007196465,4.9663740786567825,4.9104831565939193,4.8878176885147013,4.8651522204354833,4.8737570179684448,4.8823618155014064,4.9053464102195035,4.9283310049376006,4.9688152620348607,5.0092995191321208,5.0782103166538946,5.1471211141756692,5.2588097868270989,5.3704984594785294,5.5504980504715666,5.7304976414646038,5.989205901597205,6.2479141617298062,6.5616469045826049,6.8753796474354036,7.1851609311069122,7.4949422147784208,7.7507800146977184,8.0066178146170159,8.175994964722296,8.3453721148275761,8.4041100763158543,8.4628480378041324,8.4217318341924035,8.3806156305806745,8.2852120215456466,8.1898084125106205,8.091277615015116,7.9927468175196115,7.917140541524974,7.8415342655303375,7.7889410715040128,7.7363478774776882,7.7082661729882469,7.6801844684988056,7.6679692607527947,7.6557540530067847,7.6310254554961059,7.6062968579854262,7.5556892726162097,7.5050816872469932,7.4318543359077962,7.3586269845685992,7.2738878699107747,7.1891487552529512,7.0944097810787223,6.9996708069044944,6.9067298818577543,6.8137889568110142,6.7225658089766958,6.6313426611423774,6.5411250790401727,6.4509074969379689,6.3654918756095711,6.2800762542811741,6.2078995345822179,6.1357228148832617,6.0849189374068402,6.0341150599304196,6.0022608015019818,5.970406543073544,5.9439172473877537,5.9174279517019635,5.8919131699017306,5.8663983881014969,5.8502922615714255,5.8341861350413531,5.8325231569726395,5.8308601789039267,5.8448701703412098,5.858880161778492,5.9018814143784599,5.9448826669784287,6.0391840182743657,6.1334853695703027,6.2764057170529295,6.4193260645355572,6.5770513444731691,6.7347766244107801,6.8802311416079469,7.0256856588051129,7.1454561589365717,7.2652266590680314,7.3449108233965532,7.4245949877250741,7.4504972131031488,7.4763994384812236,7.4590311971852739,7.4416629558893232,7.4271425887280298,7.4126222215667363,7.440822416963135,7.4690226123595336,7.5503930334271629,7.6317634544947923,7.7596304123284341,7.8874973701620759,8.0534401471941592,8.2193829242262417,8.4108956689833665,8.6024084137404913,8.803480120531102,9.0045518273217144,9.2028781493455174,9.4012044713693204,9.5823168100676916,9.7634291487660647,9.9062891457444096,10.049149142722754,10.138271840514992,10.227394538307232,10.251946364522869,10.276498190738506,10.223278713955619,10.170059237172731,10.034801411051859,9.8995435849309885,9.7066246016294038,9.5137056183278208,9.2995252647735125,9.0853449112192042,8.8635688920966551,8.6417928729741078,8.432130652070871,8.2224684311676359,8.0515737999829131,7.8806791687981912,7.7567763927519948,7.6328736167057984,7.5525543717736801,7.4722351268415617,7.4241169055191367,7.3759986841967109,7.3501076692874285,7.3242166543781471,7.3115003317666059,7.2987840091550646,7.2826677576976797,7.2665515062402948,7.2464972811244568,7.2264430560086188,7.2021395588752561,7.1778360617418935,7.1589260490542959,7.1400160363666991,7.1269914886497849,7.1139669409328707,7.1000870234461928,7.086207105959514,7.0731618935635669,7.0601166811676208,7.050184420350746,7.0402521595338712,7.019506658404655,6.9987611572754398,6.9581730860105573,6.9175850147456757,6.8549892968693804,6.7923935789930843,6.715404994817292,6.6384164106414998,6.5527890397155906,6.4671616687896814,6.3800408068708885,6.2929199449520956,6.2115663048686409,6.1302126647851862,6.0570937506226201,5.9839748364600549,5.917186229191338,5.850397621922621,5.7902647257237287,5.7301318295248374,5.679135332125286,5.6281388347257337,5.5851074437558115,5.5420760527858892,5.5062786880947137,5.4704813234035372,5.4373126807832985,5.4041440381630599,5.3744704813915023,5.3447969246199447,5.3189296870665217,5.2930624495130987,5.2724049160108715,5.2517473825086443,5.2438639891827084,5.2359805958567733,5.2433161512406121,5.2506517066244509,5.2661100933753779,5.2815684801263059,5.2972182602958,5.312868040465295,5.3255165109823643,5.3381649814994345,5.3642391096552,5.3903132378109655,5.4393506039508708,5.4883879700907761,5.5671055866198706,5.6458232031489652,5.7571570822776437,5.8684909614063212,5.9981671024503065,6.1278432434942909,6.251843739252906,6.3758442350115212,6.4770157268743365,6.5781872187371517,6.6581627522863638,6.7381382858355767,6.8079813297860117,6.8778243737364466,6.9424274488659563,7.007030523995466,7.0706541232980706,7.1342777226006753,7.2025047452822681,7.270731767963861,7.3331296246825346,7.3955274814012091,7.4346066335926375,7.4736857857840659,7.4849220276159709,7.4961582694478759,7.4801070434094949,7.464055817371114,7.424138189034748,7.3842205606983828,7.3246041733221041,7.2649877859458254,7.1991129916723917,7.133238197398958,7.0692870158553944,7.0053358343118308,6.9453387352175966,6.8853416361233615,6.8331218965781471,6.7809021570329318,6.7236776991076592,6.6664532411823876,6.5978817159499714,6.5293101907175553,6.4564228307902205,6.3835354708628866,6.3040678199699407,6.2246001690769956,6.1373722412029448,6.050144313328893,5.9651127238137551,5.8800811342986181,5.8153122440727856,5.750543353846953,5.7074623326284328,5.6643813114099117,5.6373462667316172,5.6103112220533236,5.5998590536481432,5.5894068852429628,5.5921792774574008,5.5949516696718398,5.5988541925321558,5.6027567153924718,5.5981089783225091,5.5934612412525455,5.5753606881405648,5.5572601350285842,5.5266217901763053,5.4959834453240255,5.4650034478632303,5.4340234504024343,5.408644117949386,5.3832647854963387,5.3590962296797908,5.3349276738632438,5.3036205690573341,5.2723134642514244,5.2362599972136268,5.2002065301758291,5.1612103137504484,5.1222140973250676,5.0725132876971717,5.0228124780692767,4.9655233212120269,4.9082341643547762,4.8577459850540468,4.8072578057533173,4.7607669953182867,4.7142761848832562,4.6721020699395748,4.6299279549958934,4.5977648415045707,4.5656017280132479,4.5434575917696485,4.5213134555260481,4.5024218572925809,4.4835302590591137,4.4663190568085795,4.4491078545580462,4.4327085645033186,4.416309274448591,4.3949724262336192,4.3736355780186473,4.3455795224446589,4.3175234668706715,4.288284462915728,4.2590454589607853,4.2324085776765479,4.2057716963923113,4.1820790669199468,4.1583864374475832,4.1329296767524069,4.1074729160572305,4.081494491349515,4.0555160666417986,4.0341394559681447,4.0127628452944899,3.9972533060431248,3.9817437667917601,3.9776896308756307,3.9736354949595016,3.9897835872398599,4.0059316795202182,4.0384837484478737,4.0710358173755292,4.1153139652162407,4.1595921130569522,4.2296729264319604,4.2997537398069685,4.4073420807929082,4.5149304217788488,4.6470618257589518,4.7791932297390547,4.9162680478291723,5.0533428659192898,5.1844041347104479,5.3154654035016051,5.4237099610723831,5.5319545186431602,5.6007712024933234,5.6695878863434874,5.7048387318744727,5.740089577405457,5.7593317964070652,5.7785740154086733,5.7950168773984139,5.8114597393881553,5.8320517423072777,5.8526437452264002,5.8835351329490884,5.9144265206717757,5.9474586181243101,5.9804907155768454,5.998063629887266,6.0156365441976867,6.0102917381796841,6.0049469321616815,5.9849504658573558,5.9649539995530301,5.9276264586674596,5.8902989177818901,5.8365126126418501,5.78272630750181,5.7267961013952018,5.6708658952885926,5.6272665056433411,5.5836671159980904,5.5520298957980785,5.5203926755980657,5.491094614605573,5.4617965536130804,5.4268966480491869,5.3919967424852926,5.3502302834925111,5.3084638244997286,5.2633391821165842,5.2182145397334398,5.1748726014813338,5.1315306632292277,5.0891428993895875,5.0467551355499483,5.0063818098696053,4.9660084841892624,4.9283379953932105,4.8906675065971577,4.8557742396962986,4.8208809727954387,4.7844934677147464,4.7481059626340532,4.7083937324299807,4.6686815022259074,4.6362511905741011,4.6038208789222947,4.5831152674735485,4.5624096560248022,4.5464845473443152,4.530559438663829,4.5212861227407952,4.5120128068177614,4.5146154992429803,4.5172181916682002,4.5357421816577013,4.5542661716472033,4.5876562014398274,4.6210462312324516,4.6679088408280354,4.71477145042362,4.775285364410033,4.8357992783964452,4.9159342796993517,4.9960692810022573,5.1049602786159616,5.2138512762296658,5.3607721130028203,5.5076929497759757,5.7093906888740502,5.9110884279721239,6.181849457605713,6.4526104872393022,6.7745598253196029,7.0965091633999027,7.4291764210480142,7.7618436786961249,8.0784535180805435,8.3950633574649629,8.673870200000934,8.9526770425369051,9.1620211615499834,9.3713652805630616,9.5023533401289946,9.6333413996949258,9.6966065351054738,9.75987167051602,9.7681956568344859,9.7765196431529517,9.7517723642398941,9.7270250853268383,9.6900259672344724,9.6530268491421065,9.6080726836006782,9.56311851805925,9.5073519756355918,9.4515854332119336,9.3961071713696391,9.3406289095273429,9.2948296399833907,9.2490303704394368,9.2010854759617793,9.15314058148412,9.0959616596414961,9.0387827377988721,8.9766759659601476,8.9145691941214249,8.850580024729453,8.786590855337483,8.713055526560666,8.6395201977838472,8.5604482151486003,8.4813762325133517,8.4005448396747173,8.3197134468360829,8.245146935850542,8.1705804248649994,8.1155313877253921,8.0604823505857848,8.0145213491056992,7.9685603476256155,7.9160919424929119,7.8636235373602092,7.801850976909213,7.7400784164582168,7.6764360302264008,7.6127936439945847,7.5443342844702368,7.4758749249458889,7.3908426499451956,7.3058103749445031,7.2147907711597954,7.1237711673750876,7.0272764821589035,6.9307817969427186,6.8257647271841808,6.7207476574256431,6.6143170880626183,6.5078865186995936,6.4042087846870945,6.3005310506745964,6.2055765885789311,6.1106221264832659,6.0229820609716818,5.9353419954600968,5.8578875012114811,5.7804330069628644,5.7076891001552532,5.6349451933476429,5.560914203629677,5.4868832139117103,5.4198561519463579,5.3528290899810056,5.2928788005596896,5.2329285111383745,5.1828567726039534,5.1327850340695313,5.0918022758663568,5.0508195176631814,5.0167287657990087,4.9826380139348361,4.9613710303766956,4.9401040468185551,4.9244331033420483,4.9087621598655407,4.8901330549931012,4.8715039501206618,4.843814828269223,4.8161257064177843,4.7749584560099816,4.7337912056021789,4.6841950803746721,4.6345989551471654,4.5804847264748005,4.5263704978024348,4.4734324271662889,4.420494356530142,4.3735366558879765,4.32657895524581,4.2870271989768884,4.2474754427079677,4.2112294163331772,4.1749833899583866,4.1338690643219724,4.0927547386855583,4.0471267696416211,4.0014988005976839,3.9627296476418787,3.9239604946860736,3.9009270800347089,3.8778936653833442,3.8649751028544124,3.8520565403254801,3.8375694371532552,3.8230823339810307,3.8050642325138138,3.7870461310465968,3.7663976790407458,3.7457492270348944,3.7219137257066301,3.6980782243783659,3.6735236197201848,3.6489690150620033,3.7354138935670367,3.8218587720720705,4.2658856739182731,4.7099125757644762,5.3692144912890853,6.0285164068136936,6.6136395803176491,7.1987627538216055,7.6129984349254478,8.027234116029291,8.2668063680064972,8.5063786199837033,8.4469807852841932,8.3875829505846831,7.9924221512858278,7.5972613519869725,7.1607902211200107,6.724319090253049,6.4371949923363072,6.1500708944195646,5.9280810164448612,5.7060911384701578,5.491337656576186,5.2765841746822142,5.063983128207056,4.8513820817318969,4.649453306731564,4.447524531731232,4.2726612225456329,4.0977979133600337,3.9713953473519243,3.8449927813438145,3.7697095186914442,3.6944262560390744,3.6541278172994369,3.6138293785597995,3.5932227910965735,3.5726162036333475,3.5628054916090237,3.5529947795847003,3.5495464588784191,3.5460981381721379,3.5520702781230362,3.5580424180739345,3.5743888949056952,3.5907353717374559,3.6140985790112512,3.6374617862850465,3.6687171098475728,3.6999724334100992,3.7373213062178436,3.7746701790255877,3.8137372519929595,3.8528043249603319,3.8888450860010657,3.9248858470417995,3.957157737669446,3.9894296282970925,4.0189987190112761,4.0485678097254603,4.0732867086250817,4.0980056075247031,4.1145172775350609,4.1310289475454178,4.1379178901818552,4.1448068328182925,4.1565475565712768,4.1682882803242611,4.1809946387511125,4.1937009971779631,4.2065230696939286,4.2193451422098942,4.2332214623542992,4.2470977824987051],"type":"scatter","mode":"lines","line":{"color":"black"},"name":"Historical Trend","marker":{"color":"rgba(44,160,44,1)","line":{"color":"rgba(44,160,44,1)"}},"error_y":{"color":"rgba(44,160,44,1)"},"error_x":{"color":"rgba(44,160,44,1)"},"xaxis":"x","yaxis":"y","frame":null},{"x":[2025.75,2025.8333333333333,2025.9166666666667,2026,2026.0833333333333,2026.1666666666667,2026.25,2026.3333333333333,2026.4166666666667,2026.5,2026.5833333333333,2026.6666666666667,2026.75,2026.8333333333333,2026.9166666666667,2027,2027.0833333333333,2027.1666666666667,2027.25,2027.3333333333335,2027.4166666666667,2027.5,2027.5833333333335,2027.6666666666667,2027.75,2027.8333333333335,2027.9166666666667,2028,2028.0833333333335,2028.1666666666667,2028.25,2028.3333333333335,2028.4166666666667,2028.5,2028.5833333333335,2028.6666666666667],"y":[4.2544303942849151,4.2622875378464453,4.2600497634198131,4.2579150707956606,4.2433945787806335,4.2286931654775097,4.2120095596762486,4.1953199681254523,4.1815418933911435,4.168129362352146,4.1599082051135214,4.1523026107623879,4.1510036928059568,4.1501203378355491,4.1519314660477864,4.1541906710010714,4.1560255057767801,4.1582456424005043,4.159702188025765,4.161334006212785,4.1624920642231844,4.1635975727920869,4.1648999399238216,4.1660187351708897,4.1675196241137193,4.1688105669848898,4.1699174877236622,4.1708793882936694,4.1710928079056782,4.1712353389107646,4.1711163448060651,4.1709692061870411,4.1708520485579825,4.1707183682711078,4.1708441080041272,4.1709503499566649],"type":"scatter","mode":"lines","line":{"color":"blue","dash":"dash"},"name":"Forecast Trend","marker":{"color":"rgba(214,39,40,1)","line":{"color":"rgba(214,39,40,1)"}},"error_y":{"color":"rgba(214,39,40,1)"},"error_x":{"color":"rgba(214,39,40,1)"},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
