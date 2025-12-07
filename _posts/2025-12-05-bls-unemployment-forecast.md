@@ -33,7 +33,7 @@ You can download these data yourself on the Federal Reserve Bank of St. Louis si
 
 Accurate information about future unemployments trends could be incredibly helpful for job seekers and employers. For example, if unemployment is expected to increase over the next year but recover within three years, a person considering a job change might decide to stay at their current role for now and delay their job search until the job market is in their favor. However, it seems unlikely that anyone can predict so far into the future with great accuracy.
 
-So what, if anything, can past unemployment data can tell us about the current cycle of unemployment? When will it reach its peak, and when will it recover? 
+So what, if anything, can past unemployment data tell us about the current cycle of unemployment? When will it reach its peak, and when will it recover? 
 
 # Historical Unemployment Cycles
 
